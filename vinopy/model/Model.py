@@ -1,30 +1,25 @@
 
-import matplotlib.pyplot as plt
-import math
 import os
 import numpy as np
 import cv2
-from io import BytesIO
-from PIL import Image
-import requests
-from openvino.inference_engine import IENetwork, IEPlugin, IECore
+from openvino.inference_engine import IENetwork, IEPlugin
 import sys
-import logging as log
-import time
+
+from vinopy.util.config import CONFIG
 
 # '/opt/intel/openvino_2019.2.242/python/python3.7' doesn't work
 sys.path[1] = '/opt/intel/openvino_2019.2.242/python/python3.6'
 
-_DEVICE = "CPU"
-_MODEL_DIR = './intel_models/'
-_EXTENSION = "/opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension.dylib"
+DEVICE = CONFIG["MODEL"]["DEVICE"]
+MODEL_DIR = CONFIG["MODEL"]["MODEL_DIR"]
+CPU_EXTENSION = CONFIG["MODEL"]["CPU_EXTENSION"]
 
-if _DEVICE == "CPU":
-    _MODEL_FP = 'FP32'
+if DEVICE == "CPU":
+    MODEL_FP = 'FP32'
 else:
     raise NotImplementedError
 
-tasks = {'detect_face': 'face-detection-adas-0001',
+TASKS = {'detect_face': 'face-detection-adas-0001',
          'emotion_recognition': 'emotions-recognition-retail-0003',
          'estimate_headpose': 'head-pose-estimation-adas-0001',
          'detect_person': 'person-detection-retail-0002'}
@@ -34,7 +29,7 @@ class Model(object):
     # TODO: load from config
     def __init__(self, task):
         self.task = task
-        self.device = _DEVICE
+        self.device = DEVICE
         self._set_model_path()
         # Read IR
         self.net = IENetwork(model=self.model_xml, weights=self.model_bin)
@@ -44,13 +39,13 @@ class Model(object):
 
     def _set_ieplugin(self):
         plugin = IEPlugin(device=self.device, plugin_dirs=None)
-        if _DEVICE == "CPU":
-            plugin.add_cpu_extension(_EXTENSION)
+        if DEVICE == "CPU":
+            plugin.add_cpu_extension(CPU_EXTENSION)
         self.exec_net = plugin.load(network=self.net, num_requests=2)
 
     def _set_model_path(self):
-        model_name = tasks[self.task]
-        path_model_dir = os.path.join(_MODEL_DIR, model_name, _MODEL_FP)
+        model_name = TASKS[self.task]
+        path_model_dir = os.path.join(MODEL_DIR, model_name, MODEL_FP)
 
         self.model_xml = os.path.join(
             path_model_dir, model_name + '.xml')
@@ -77,7 +72,6 @@ class ModelDetectFace(Model):
         frame = cv2.resize(frame, dsize=None, fx=scale, fy=scale)
 
         self.frame_h, self.frame_w = frame.shape[:2]
-        init_frame = frame.copy()
 
         in_frame = self._in_frame(frame, n, c, h, w)
         # res's shape: [1, 1, 200, 7]
@@ -96,7 +90,9 @@ class ModelDetectFace(Model):
         # frame = init_frame.copy()
         for face in faces[0][0]:
             box = face[3:7] * np.array([self.frame_w,
-                                        self.frame_h, self.frame_w, self.frame_h])
+                                        self.frame_h,
+                                        self.frame_w,
+                                        self.frame_h])
             (xmin, ymin, xmax, ymax) = box.astype("int")
             """
             xmin = int(face[3] * frame_w)

@@ -1,8 +1,6 @@
 
-from ..Model import ModelDetectFace
+from ..model.Model import ModelDetectFace
 from vinopy.util.config import CONFIG
-
-TASKS = CONFIG['DETECTOR']['TASKS']
 
 
 class Detector(object):
