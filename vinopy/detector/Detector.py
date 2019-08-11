@@ -1,5 +1,5 @@
 
-from ..model.Model import ModelDetectFace
+from ..model.Model import ModelDetectFace, ModelEstimateHeadpose
 from vinopy.util.config import CONFIG
 
 
