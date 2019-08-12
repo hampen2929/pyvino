@@ -2,7 +2,6 @@
 from ..model.model_face import (ModelDetectFace,
                                 ModelEstimateHeadpose,
                                 ModelEmotionRecognition)
-from vinopy.util.config import CONFIG
 
 
 class Detector(object):

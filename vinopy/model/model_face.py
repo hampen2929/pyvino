@@ -95,11 +95,9 @@ class ModelEstimateHeadpose(ModelFace):
                        [math.sin(roll),   math.cos(roll),                  0],
                        [0,                0,                               1]])
 
-        # R = np.dot(Rz, Ry, Rx)
         # ref: https://www.learnopencv.com/rotation-matrix-to-euler-angles/
-        # R = np.dot(Rz, np.dot(Ry, Rx))
         R = Rz @ Ry @ Rx
-        # print(R)
+        
         camera_matrix = self._build_camera_matrix(center_of_face, focal_length)
 
         xaxis = np.array(([1 * scale, 0, 0]), dtype='float32').reshape(3, 1)
