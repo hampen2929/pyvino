@@ -3,7 +3,6 @@
 from vinopy.model.model_face import (ModelDetectFace,
                                      ModelEstimateHeadpose,
                                      ModelEmotionRecognition)
-import cv2
 from PIL import Image
 import numpy as np
 import pytest
