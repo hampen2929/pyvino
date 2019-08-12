@@ -1,12 +1,13 @@
 
 
-from vinopy.model.model_face import ModelDetectFace, ModelEmotionRecognition
+from vinopy.model.model_face import (ModelDetectFace,
+                                     ModelEstimateHeadpose,
+                                     ModelEmotionRecognition)
 import cv2
 from PIL import Image
 import numpy as np
 import pytest
 import sys
-sys.path[1] = '/opt/intel/openvino_2019.2.242/python/python3.6'
 
 TEST_DATA = './data/test/test.jpg'
 
@@ -37,16 +38,46 @@ class TestModelDetectFace(TestModelFace):
         np.testing.assert_almost_equal(faces, faces_exp)
 
 
+class TestModelEstimateHeadpose(TestModelFace):
+    def test_get_axis(self):
+        frame = self.load_image()
+
+        model_df = ModelDetectFace('detect_face')
+        model_df.get_frame_shape(frame)
+        faces = model_df.get_face_pos(frame)
+
+        model_es = ModelEstimateHeadpose('estimate_headpose')
+        headpose_exps = [(-7.8038163, 15.785929, -3.390882), 
+                         (-12.603701, 9.402246, -11.0962925), 
+                         (-5.01876, 23.120262, -1.7416985), 
+                         (2.898665, 26.77724, 15.251921)]
+        for face, headpose_exp in zip(faces[0][0], headpose_exps):
+            xmin, ymin, xmax, ymax = model_df.get_box(face, frame)
+            face_frame = model_df.crop_face_frame(frame,
+                                                  xmin, ymin, xmax, ymax)
+            headpose = model_es.get_axis(face_frame)
+            headpose = np.asarray(headpose).astype(np.float32)
+            headpose_exp = np.asarray(headpose_exp).astype(np.float32)
+            
+            np.testing.assert_almost_equal(headpose, headpose_exp)
+
+    
+    def test_get_center_face(self):
+        pass
+
+
 class TestModelEmotionRecognition(TestModelFace):
     def test_get_face_pos(self):
         frame = self.load_image()
-        model_df = ModelDetectFace('detect_face')
-        model_er = ModelEmotionRecognition('emotion_recognition')
 
+        model_df = ModelDetectFace('detect_face')
         model_df.get_frame_shape(frame)
         faces = model_df.get_face_pos(frame)
-        emotion_exp = ['happy', 'happy', 'happy', 'happy']
-        for face, emotion_exp in zip(faces[0][0], emotion_exp):
+
+        model_er = ModelEmotionRecognition('emotion_recognition')
+
+        emotions_exp = ['happy', 'happy', 'happy', 'happy']
+        for face, emotion_exp in zip(faces[0][0], emotions_exp):
             xmin, ymin, xmax, ymax = model_df.get_box(face, frame)
             face_frame = model_df.crop_face_frame(frame,
                                                   xmin, ymin, xmax, ymax)

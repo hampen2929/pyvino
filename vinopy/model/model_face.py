@@ -1,7 +1,6 @@
 
 import numpy as np
 import cv2
-from openvino.inference_engine import IENetwork, IEPlugin
 import math
 
 from vinopy.model.model import Model
@@ -18,6 +17,9 @@ class ModelFace(Model):
         return xmin, ymin, xmax, ymax
 
     def _in_frame(self, frame, n, c, h, w):
+        """
+        transform frame for input data 
+        """
         in_frame = cv2.resize(frame, (w, h))
         in_frame = in_frame.transpose((2, 0, 1))
         in_frame = in_frame.reshape((n, c, h, w))
@@ -93,9 +95,9 @@ class ModelEstimateHeadpose(ModelFace):
                        [math.sin(roll),   math.cos(roll),                  0],
                        [0,                0,                               1]])
 
-        #R = np.dot(Rz, Ry, Rx)
+        # R = np.dot(Rz, Ry, Rx)
         # ref: https://www.learnopencv.com/rotation-matrix-to-euler-angles/
-        #R = np.dot(Rz, np.dot(Ry, Rx))
+        # R = np.dot(Rz, np.dot(Ry, Rx))
         R = Rz @ Ry @ Rx
         # print(R)
         camera_matrix = self._build_camera_matrix(center_of_face, focal_length)
@@ -135,23 +137,31 @@ class ModelEstimateHeadpose(ModelFace):
 
         return frame
 
-    def get_axis(self):
-        yaw = .0  # Axis of rotation: y
-        pitch = .0  # Axis of rotation: x
-        roll = .0  # Axis of rotation: z
-        # Each output contains one float value that represents value in Tait-Bryan angles (yaw, pitсh or roll).
-        yaw = self.exec_net.requests[0].outputs['angle_y_fc'][0][0]
-        pitch = self.exec_net.requests[0].outputs['angle_p_fc'][0][0]
-        roll = self.exec_net.requests[0].outputs['angle_r_fc'][0][0]
+    def get_axis(self, face_frame):
+        n, c, h, w = self.net.inputs[self.input_blob].shape
+        in_frame = self._in_frame(face_frame, n, c, h, w)
+        self.exec_net.start_async(request_id=0, inputs={self.input_blob: in_frame})
+        if self.exec_net.requests[0].wait(-1) == 0:
+            yaw = .0  # Axis of rotation: y
+            pitch = .0  # Axis of rotation: x
+            roll = .0  # Axis of rotation: z
+            # Each output contains one float value that represents value in Tait-Bryan angles (yaw, pitсh or roll).
+            yaw = self.exec_net.requests[0].outputs['angle_y_fc'][0][0]
+            pitch = self.exec_net.requests[0].outputs['angle_p_fc'][0][0]
+            roll = self.exec_net.requests[0].outputs['angle_r_fc'][0][0]
         return yaw, pitch, roll
+
+
+    def get_center_face(self, face_frame, xmin, ymin):
+        if self.exec_net.requests[0].wait(-1) == 0:
+            center_of_face = (xmin + face_frame.shape[1] / 2, ymin + face_frame.shape[0] / 2, 0)
+        return center_of_face
+
 
     def estimate_headpose(self, frame, faces):
         # 4. Create Async Request
         scale = 50
         focal_length = 950.0
-
-        n, c, h, w = self.net.inputs[self.input_blob].shape
-
         if len(faces) > 0:
             for face in faces[0][0]:
                 xmin, ymin, xmax, ymax = self.get_box(face, frame)
@@ -159,15 +169,11 @@ class ModelEstimateHeadpose(ModelFace):
 
                 if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
                     continue
-                in_frame = self._in_frame(frame, n, c, h, w)
-                self.exec_net.start_async(request_id=0, inputs={
-                                          self.input_blob: in_frame})
-                if self.exec_net.requests[0].wait(-1) == 0:
-                    yaw, pitch, roll = self.get_axis()
-                    center_of_face = (
-                        xmin + face_frame.shape[1] / 2, ymin + face_frame.shape[0] / 2, 0)
-                    self._draw_axes(frame, center_of_face, yaw,
-                                    pitch, roll, scale, focal_length)
+                
+                yaw, pitch, roll = self.get_axis(face_frame)
+                center_of_face = self.get_center_face(face_frame, xmin, ymin)
+                self._draw_axes(frame, center_of_face, yaw,
+                                pitch, roll, scale, focal_length)
 
         return frame
 
