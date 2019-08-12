@@ -1,16 +1,11 @@
 
-import os
 import numpy as np
 import cv2
 from openvino.inference_engine import IENetwork, IEPlugin
-import sys
 import math
 
 from vinopy.model.model import Model
 from vinopy.util.config import CONFIG
-
-# '/opt/intel/openvino_2019.2.242/python/python3.7' doesn't work
-sys.path[1] = '/opt/intel/openvino_2019.2.242/python/python3.6'
 
 
 class ModelFace(Model):
@@ -131,7 +126,7 @@ class ModelEstimateHeadpose(ModelFace):
 
         return frame
 
-    def get_axis(self, ):
+    def get_axis(self):
         yaw = .0  # Axis of rotation: y
         pitch = .0  # Axis of rotation: x
         roll = .0  # Axis of rotation: z

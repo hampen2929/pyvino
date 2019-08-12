@@ -1,14 +1,7 @@
 
 import os
-import numpy as np
-import cv2
 from openvino.inference_engine import IENetwork, IEPlugin
-import sys
-import math
 from vinopy.util.config import CONFIG
-
-# '/opt/intel/openvino_2019.2.242/python/python3.7' doesn't work
-sys.path[1] = '/opt/intel/openvino_2019.2.242/python/python3.6'
 
 DEVICE = CONFIG["MODEL"]["DEVICE"]
 MODEL_DIR = CONFIG["MODEL"]["MODEL_DIR"]
