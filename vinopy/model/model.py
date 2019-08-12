@@ -1,21 +1,8 @@
 
 import os
 from openvino.inference_engine import IENetwork, IEPlugin
-from vinopy.util.config import CONFIG
-
-DEVICE = CONFIG["MODEL"]["DEVICE"]
-MODEL_DIR = CONFIG["MODEL"]["MODEL_DIR"]
-CPU_EXTENSION = CONFIG["MODEL"]["CPU_EXTENSION"]
-
-if DEVICE == "CPU":
-    MODEL_FP = 'FP32'
-else:
-    raise NotImplementedError
-
-TASKS = {'detect_face': 'face-detection-adas-0001',
-         'emotion_recognition': 'emotions-recognition-retail-0003',
-         'estimate_headpose': 'head-pose-estimation-adas-0001',
-         'detect_person': 'person-detection-retail-0002'}
+from vinopy.util.config import (DEVICE, MODEL_DIR, MODEL_FP,
+                                CPU_EXTENSION, TASKS)
 
 
 class Model(object):
