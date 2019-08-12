@@ -55,9 +55,3 @@ class Model(object):
     def _get_io_blob(self):
         self.input_blob = next(iter(self.net.inputs))
         self.out_blob = next(iter(self.net.outputs))
-
-    def _in_frame(self, frame, n, c, h, w):
-        in_frame = cv2.resize(frame, (w, h))
-        in_frame = in_frame.transpose((2, 0, 1))
-        in_frame = in_frame.reshape((n, c, h, w))
-        return in_frame

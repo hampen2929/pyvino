@@ -13,7 +13,23 @@ from vinopy.util.config import CONFIG
 sys.path[1] = '/opt/intel/openvino_2019.2.242/python/python3.6'
 
 
-class ModelDetectFace(Model):
+class ModelFace(Model):
+    def get_box(self, face):
+        box = face[3:7] * np.array([self.frame_w,
+                                    self.frame_h,
+                                    self.frame_w,
+                                    self.frame_h])
+        xmin, ymin, xmax, ymax = box.astype("int")
+        return xmin, ymin, xmax, ymax
+
+    def _in_frame(self, frame, n, c, h, w):
+        in_frame = cv2.resize(frame, (w, h))
+        in_frame = in_frame.transpose((2, 0, 1))
+        in_frame = in_frame.reshape((n, c, h, w))
+        return in_frame
+
+
+class ModelDetectFace(ModelFace):
     # TODO: load from config
     def get_face_pos(self, frame):
         n, c, h, w = self.net.inputs[self.input_blob].shape
@@ -34,14 +50,6 @@ class ModelDetectFace(Model):
             faces = res[0][:, np.where(res[0][0][:, 2] > 0.5)]
         return faces
 
-    def get_box(self, face):
-        box = face[3:7] * np.array([self.frame_w,
-                                    self.frame_h,
-                                    self.frame_w,
-                                    self.frame_h])
-        xmin, ymin, xmax, ymax = box.astype("int")
-        return xmin, ymin, xmax, ymax
-
     def detect_face(self, frame):
         faces = self.get_face_pos(frame)
         for face in faces[0][0]:
@@ -50,7 +58,7 @@ class ModelDetectFace(Model):
         return frame
 
 
-class ModelEstimateHeadpose(Model):
+class ModelEstimateHeadpose(ModelFace):
     def _build_camera_matrix(self, center_of_face, focal_length):
 
         cx = int(center_of_face[0])
@@ -123,19 +131,27 @@ class ModelEstimateHeadpose(Model):
 
         return frame
 
+    def get_axis(self, ):
+        yaw = .0  # Axis of rotation: y
+        pitch = .0  # Axis of rotation: x
+        roll = .0  # Axis of rotation: z
+        # Each output contains one float value that represents value in Tait-Bryan angles (yaw, pitсh or roll).
+        yaw = self.exec_net.requests[0].outputs['angle_y_fc'][0][0]
+        pitch = self.exec_net.requests[0].outputs['angle_p_fc'][0][0]
+        roll = self.exec_net.requests[0].outputs['angle_r_fc'][0][0]
+        return yaw, pitch, roll
+
     def estimate_headpose(self, frame, faces):
         # 4. Create Async Request
         scale = 50
         focal_length = 950.0
-        frame_h, frame_w = frame.shape[:2]
+        self.frame_h, self.frame_w = frame.shape[:2]
 
         n, c, h, w = self.net.inputs[self.input_blob].shape
 
         if len(faces) > 0:
             for face in faces[0][0]:
-                box = face[3:7] * \
-                    np.array([frame_w, frame_h, frame_w, frame_h])
-                (xmin, ymin, xmax, ymax) = box.astype("int")
+                xmin, ymin, xmax, ymax = self.get_box(face)
                 face_frame = frame[ymin:ymax, xmin:xmax]
 
                 if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
@@ -144,43 +160,26 @@ class ModelEstimateHeadpose(Model):
                 self.exec_net.start_async(request_id=0, inputs={
                                           self.input_blob: in_frame})
                 if self.exec_net.requests[0].wait(-1) == 0:
-                    yaw = .0  # Axis of rotation: y
-                    pitch = .0  # Axis of rotation: x
-                    roll = .0  # Axis of rotation: z
-                    # Each output contains one float value that represents value in Tait-Bryan angles (yaw, pitсh or roll).
-                    yaw = self.exec_net.requests[0].outputs['angle_y_fc'][0][0]
-                    pitch = self.exec_net.requests[0].outputs['angle_p_fc'][0][0]
-                    roll = self.exec_net.requests[0].outputs['angle_r_fc'][0][0]
-                    # print("yaw:{:f}, pitch:{:f}, roll:{:f}".format(yaw, pitch, roll))
+                    yaw, pitch, roll = self.get_axis()
                     center_of_face = (
                         xmin + face_frame.shape[1] / 2, ymin + face_frame.shape[0] / 2, 0)
                     self._draw_axes(frame, center_of_face, yaw,
                                     pitch, roll, scale, focal_length)
-        else:
-            pass
 
         return frame
 
 
-# plot setting
-# rows = 6
-# columns = 6
-# plt.rcParams['figure.figsize'] = (18.0, 18.0)
-# figsize = (8, 8)
-
-
-class ModelEmotionRecognition(Model):
+class ModelEmotionRecognition(ModelFace):
     def __init__(self, task):
         super().__init__(task)
         self.label = ('neutral', 'happy', 'sad', 'surprise', 'anger')
 
     def emotion_recognition(self, frame, faces, rect):  # 4. Create Async Request
-        frame_h, frame_w = frame.shape[:2]
+        self.frame_h, self.frame_w = frame.shape[:2]
         n, c, h, w = self.net.inputs[self.input_blob].shape
         face_id = 0
         for face in faces[0][0]:
-            box = face[3:7] * np.array([frame_w, frame_h, frame_w, frame_h])
-            (xmin, ymin, xmax, ymax) = box.astype("int")
+            xmin, ymin, xmax, ymax = self.get_box(face)
             face_frame = frame[ymin:ymax, xmin:xmax]
 
             if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
@@ -194,14 +193,12 @@ class ModelEmotionRecognition(Model):
             if self.exec_net.requests[0].wait(-1) == 0:
                 res = self.exec_net.requests[0].outputs[self.out_blob]
                 emotion = self.label[np.argmax(res[0])]
-                # ax = plt.subplot(rows, columns, face_id + 1)
-                # ax.set_title("{}".format(emotion))
-                # plt.imshow(face_frame)
                 face_id += 1
 
             if rect:
-                frame = cv2.rectangle(
-                    frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
+                frame = cv2.rectangle(frame,
+                                      (xmin, ymin), (xmax, ymax),
+                                      (0, 255, 0), 2)
 
             cv2.putText(frame, emotion,
                         (int(xmin + (xmax - xmin) / 2), int(ymin - 10)),
