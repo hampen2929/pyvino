@@ -2,3 +2,4 @@ storage/
 .ipynb_checkpoints/
 __pycache__
 intel_models/
+.vscode
