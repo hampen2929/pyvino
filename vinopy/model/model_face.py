@@ -1,7 +1,7 @@
 
 import numpy as np
-import cv2
 import math
+import cv2
 
 from vinopy.model.model import Model
 
@@ -15,15 +15,6 @@ class ModelFace(Model):
                                     frame_h])
         xmin, ymin, xmax, ymax = box.astype("int")
         return xmin, ymin, xmax, ymax
-
-    def _in_frame(self, frame, n, c, h, w):
-        """
-        transform frame for input data 
-        """
-        in_frame = cv2.resize(frame, (w, h))
-        in_frame = in_frame.transpose((2, 0, 1))
-        in_frame = in_frame.reshape((n, c, h, w))
-        return in_frame
 
     def crop_face_frame(self, frame, xmin, ymin, xmax, ymax):
         face_frame = frame[ymin:ymax, xmin:xmax]
