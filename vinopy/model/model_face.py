@@ -149,12 +149,10 @@ class ModelEstimateHeadpose(ModelFace):
             roll = self.exec_net.requests[0].outputs['angle_r_fc'][0][0]
         return yaw, pitch, roll
 
-
     def get_center_face(self, face_frame, xmin, ymin):
         if self.exec_net.requests[0].wait(-1) == 0:
             center_of_face = (xmin + face_frame.shape[1] / 2, ymin + face_frame.shape[0] / 2, 0)
         return center_of_face
-
 
     def estimate_headpose(self, frame, faces):
         # 4. Create Async Request
@@ -197,19 +195,14 @@ class ModelEmotionRecognition(ModelFace):
         for face in faces[0][0]:
             xmin, ymin, xmax, ymax = self.get_box(face, frame)
             face_frame = self.crop_face_frame(frame, xmin, ymin, xmax, ymax)
-            
             if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
                 continue
-
             emotion = self.get_emotion(face_frame)
-
             if rect:
                 frame = cv2.rectangle(frame,
                                       (xmin, ymin), (xmax, ymax),
                                       (0, 255, 0), 2)
-
             cv2.putText(frame, emotion,
                         (int(xmin + (xmax - xmin) / 2), int(ymin - 10)),
                         cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 200), 2, cv2.LINE_AA)
-
         return frame

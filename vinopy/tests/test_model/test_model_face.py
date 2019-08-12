@@ -6,7 +6,6 @@ from vinopy.model.model_face import (ModelDetectFace,
 from PIL import Image
 import numpy as np
 import pytest
-import sys
 
 TEST_DATA = './data/test/test.jpg'
 
@@ -60,10 +59,8 @@ class TestModelEstimateHeadpose(TestModelFace):
             
             np.testing.assert_almost_equal(headpose, headpose_exp)
 
-    
     def test_get_center_face(self):
         pass
-
 
 class TestModelEmotionRecognition(TestModelFace):
     def test_get_face_pos(self):
