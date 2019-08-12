@@ -1,4 +1,5 @@
 # install openvino
+
 ## macOS
 
 https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_macos.html
@@ -7,7 +8,29 @@ https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino
 
 source /opt/intel/openvino/bin/setupvars.sh
 
-# python 
+# directory sturucture
 
-/opt/intel/openvino_2019.2.242/deployment_tools/inference_engine/demos/python_demos/object_detection_demo_ssd_async/object_detection_demo_ssd_async.py
+```
 
+├── vinopy
+|   └── detector
+|       └── detector
+
+|   ├── model
+|   └── util
+├── congi
+├── _includes
+|   ├── footer.html
+|   └── header.html
+├── _layouts
+|   ├── default.html
+|   └── post.html
+├── _posts
+|   ├── 2007-10-29-why-every-programmer-should-play-nethack.textile
+|   └── 2009-04-26-barcamp-boston-4-roundup.textile
+├── _data
+|   └── members.yml
+├── _site
+└── index.html
+
+```
