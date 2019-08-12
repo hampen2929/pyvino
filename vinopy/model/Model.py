@@ -85,24 +85,19 @@ class ModelDetectFace(Model):
             faces = res[0][:, np.where(res[0][0][:, 2] > 0.5)]
         return faces
 
+    def get_box(self, face):
+        box = face[3:7] * np.array([self.frame_w,
+                                    self.frame_h,
+                                    self.frame_w,
+                                    self.frame_h])
+        xmin, ymin, xmax, ymax = box.astype("int")
+        return xmin, ymin, xmax, ymax
+
     def detect_face(self, frame):
         faces = self.get_face_pos(frame)
-
-        # frame = init_frame.copy()
         for face in faces[0][0]:
-            box = face[3:7] * np.array([self.frame_w,
-                                        self.frame_h,
-                                        self.frame_w,
-                                        self.frame_h])
-            (xmin, ymin, xmax, ymax) = box.astype("int")
-            """
-            xmin = int(face[3] * frame_w)
-            ymin = int(face[4] * frame_h)
-            xmax = int(face[5] * frame_w)
-            ymax = int(face[6] * frame_h)
-            """
+            xmin, ymin, xmax, ymax = self.get_box(face)
             cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
-
         return frame
 
 
