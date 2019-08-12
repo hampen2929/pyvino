@@ -1,5 +1,7 @@
 
-from ..model.Model import ModelDetectFace, ModelEstimateHeadpose
+from ..model.Model import (ModelDetectFace,
+                           ModelEstimateHeadpose,
+                           ModelEmotionRecognition)
 from vinopy.util.config import CONFIG
 
 
