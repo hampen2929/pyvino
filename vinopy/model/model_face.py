@@ -184,11 +184,6 @@ class ModelEmotionRecognition(ModelFace):
         self.label = ('neutral', 'happy', 'sad', 'surprise', 'anger')
 
     def get_emotion(self, face_frame):
-        emotion = False
-
-        if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
-            return emotion
-
         n, c, h, w = self.net.inputs[self.input_blob].shape
         in_frame = self._in_frame(face_frame, n, c, h, w)
         self.exec_net.start_async(request_id=0, inputs={
@@ -204,6 +199,10 @@ class ModelEmotionRecognition(ModelFace):
         for face in faces[0][0]:
             xmin, ymin, xmax, ymax = self.get_box(face, frame)
             face_frame = self.crop_face_frame(frame, xmin, ymin, xmax, ymax)
+            
+            if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
+                continue
+
             emotion = self.get_emotion(face_frame)
 
             if rect:
