@@ -5,15 +5,15 @@ from openvino.inference_engine import IENetwork, IEPlugin
 import math
 
 from vinopy.model.model import Model
-from vinopy.util.config import CONFIG
 
 
 class ModelFace(Model):
-    def get_box(self, face):
-        box = face[3:7] * np.array([self.frame_w,
-                                    self.frame_h,
-                                    self.frame_w,
-                                    self.frame_h])
+    def get_box(self, face, frame):
+        frame_h, frame_w = frame.shape[:2]
+        box = face[3:7] * np.array([frame_w,
+                                    frame_h,
+                                    frame_w,
+                                    frame_h])
         xmin, ymin, xmax, ymax = box.astype("int")
         return xmin, ymin, xmax, ymax
 
@@ -23,10 +23,18 @@ class ModelFace(Model):
         in_frame = in_frame.reshape((n, c, h, w))
         return in_frame
 
+    def crop_face_frame(self, frame, xmin, ymin, xmax, ymax):
+        face_frame = frame[ymin:ymax, xmin:xmax]
+        return face_frame
+
+    def get_frame_shape(self, frame):
+        self.frame_h, self.frame_w = frame.shape[:2]
+
 
 class ModelDetectFace(ModelFace):
-    # TODO: load from config
-    def get_face_pos(self, frame):
+    def get_face_pos(self, init_frame):
+        frame = init_frame.copy()
+
         n, c, h, w = self.net.inputs[self.input_blob].shape
         self.shapes = (n, c, h, w)
         scale = 640 / frame.shape[1]
@@ -45,10 +53,11 @@ class ModelDetectFace(ModelFace):
             faces = res[0][:, np.where(res[0][0][:, 2] > 0.5)]
         return faces
 
-    def detect_face(self, frame):
+    def detect_face(self, init_frame):
+        frame = init_frame.copy()
         faces = self.get_face_pos(frame)
         for face in faces[0][0]:
-            xmin, ymin, xmax, ymax = self.get_box(face)
+            xmin, ymin, xmax, ymax = self.get_box(face, frame)
             cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
         return frame
 
@@ -140,13 +149,12 @@ class ModelEstimateHeadpose(ModelFace):
         # 4. Create Async Request
         scale = 50
         focal_length = 950.0
-        self.frame_h, self.frame_w = frame.shape[:2]
 
         n, c, h, w = self.net.inputs[self.input_blob].shape
 
         if len(faces) > 0:
             for face in faces[0][0]:
-                xmin, ymin, xmax, ymax = self.get_box(face)
+                xmin, ymin, xmax, ymax = self.get_box(face, frame)
                 face_frame = frame[ymin:ymax, xmin:xmax]
 
                 if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
@@ -169,26 +177,28 @@ class ModelEmotionRecognition(ModelFace):
         super().__init__(task)
         self.label = ('neutral', 'happy', 'sad', 'surprise', 'anger')
 
-    def emotion_recognition(self, frame, faces, rect):  # 4. Create Async Request
-        self.frame_h, self.frame_w = frame.shape[:2]
+    def get_emotion(self, face_frame):
+        emotion = False
+
+        if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
+            return emotion
+
         n, c, h, w = self.net.inputs[self.input_blob].shape
-        face_id = 0
+        in_frame = self._in_frame(face_frame, n, c, h, w)
+        self.exec_net.start_async(request_id=0, inputs={
+            self.input_blob: in_frame})
+
+        if self.exec_net.requests[0].wait(-1) == 0:
+            res = self.exec_net.requests[0].outputs[self.out_blob]
+            emotion = self.label[np.argmax(res[0])]
+        return emotion
+
+    def emotion_recognition(self, init_frame, faces, rect):  # 4. Create Async Request
+        frame = init_frame.copy()
         for face in faces[0][0]:
-            xmin, ymin, xmax, ymax = self.get_box(face)
-            face_frame = frame[ymin:ymax, xmin:xmax]
-
-            if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
-                continue
-
-            in_frame = self._in_frame(frame, n, c, h, w)
-            self.exec_net.start_async(request_id=0, inputs={
-                                      self.input_blob: in_frame})
-
-            # 5. Get reponse
-            if self.exec_net.requests[0].wait(-1) == 0:
-                res = self.exec_net.requests[0].outputs[self.out_blob]
-                emotion = self.label[np.argmax(res[0])]
-                face_id += 1
+            xmin, ymin, xmax, ymax = self.get_box(face, frame)
+            face_frame = self.crop_face_frame(frame, xmin, ymin, xmax, ymax)
+            emotion = self.get_emotion(face_frame)
 
             if rect:
                 frame = cv2.rectangle(frame,
