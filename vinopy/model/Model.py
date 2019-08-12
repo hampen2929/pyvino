@@ -216,3 +216,51 @@ class ModelEstimateHeadpose(Model):
             pass
 
         return frame
+
+
+# plot setting
+# rows = 6
+# columns = 6
+# plt.rcParams['figure.figsize'] = (18.0, 18.0)
+# figsize = (8, 8)
+
+
+class ModelEmotionRecognition(Model):
+    def __init__(self, task):
+        super().__init__(task)
+        self.label = ('neutral', 'happy', 'sad', 'surprise', 'anger')
+
+    def emotion_recognition(self, frame, faces, rect):  # 4. Create Async Request
+        frame_h, frame_w = frame.shape[:2]
+        n, c, h, w = self.net.inputs[self.input_blob].shape
+        face_id = 0
+        for face in faces[0][0]:
+            box = face[3:7] * np.array([frame_w, frame_h, frame_w, frame_h])
+            (xmin, ymin, xmax, ymax) = box.astype("int")
+            face_frame = frame[ymin:ymax, xmin:xmax]
+
+            if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
+                continue
+
+            in_frame = self._in_frame(frame, n, c, h, w)
+            self.exec_net.start_async(request_id=0, inputs={
+                                      self.input_blob: in_frame})
+
+            # 5. Get reponse
+            if self.exec_net.requests[0].wait(-1) == 0:
+                res = self.exec_net.requests[0].outputs[self.out_blob]
+                emotion = self.label[np.argmax(res[0])]
+                # ax = plt.subplot(rows, columns, face_id + 1)
+                # ax.set_title("{}".format(emotion))
+                # plt.imshow(face_frame)
+                face_id += 1
+
+            if rect:
+                frame = cv2.rectangle(
+                    frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
+
+            cv2.putText(frame, emotion,
+                        (int(xmin + (xmax - xmin) / 2), int(ymin - 10)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 200), 2, cv2.LINE_AA)
+
+        return frame
