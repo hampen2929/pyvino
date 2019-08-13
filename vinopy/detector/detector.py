@@ -26,10 +26,10 @@ class Detector(object):
         if self.task == 'detect_face':
             frame = self.model_df.detect_face(frame)
         elif self.task == 'emotion_recognition':
-            faces = self.model_df.get_face_pos(frame)
+            faces = self.model_df.get_pos(frame)
             frame = self.model_er.emotion_recognition(frame, faces, self.rect)
         elif self.task == 'estimate_headpose':
-            faces = self.model_df.get_face_pos(frame)
+            faces = self.model_df.get_pos(frame)
             frame = self.model_eh.estimate_headpose(frame, faces)
         else:
             raise NotImplementedError

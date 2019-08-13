@@ -5,31 +5,28 @@ import cv2
 
 from vinopy.model.model import Model
 
-
-class ModelFace(Model):
-    def get_box(self, face, frame):
+class ModelDetect(Model):
+    def __init__(self, task):
+        self.task = task
+        super().__init__(self.task)
+    
+    def get_box(self, bbox, frame):
         frame_h, frame_w = frame.shape[:2]
-        box = face[3:7] * np.array([frame_w,
+        box = bbox[3:7] * np.array([frame_w,
                                     frame_h,
                                     frame_w,
                                     frame_h])
         xmin, ymin, xmax, ymax = box.astype("int")
         return xmin, ymin, xmax, ymax
 
-    def crop_face_frame(self, frame, xmin, ymin, xmax, ymax):
-        face_frame = frame[ymin:ymax, xmin:xmax]
-        return face_frame
+    def crop_bbox_frame(self, frame, xmin, ymin, xmax, ymax):
+        bbox_frame = frame[ymin:ymax, xmin:xmax]
+        return bbox_frame
 
     def get_frame_shape(self, frame):
         self.frame_h, self.frame_w = frame.shape[:2]
-
-
-class ModelDetectFace(ModelFace):
-    def __init__(self):
-        self.task = 'detect_face'
-        super().__init__(self.task)
-        
-    def get_face_pos(self, init_frame):
+    
+    def get_pos(self, init_frame):
         frame = init_frame.copy()
 
         n, c, h, w = self.net.inputs[self.input_blob].shape
@@ -47,19 +44,31 @@ class ModelDetectFace(ModelFace):
         if self.exec_net.requests[0].wait(-1) == 0:
             res = self.exec_net.requests[0].outputs[self.out_blob]
             # prob threshold : 0.5
-            faces = res[0][:, np.where(res[0][0][:, 2] > 0.5)]
-        return faces
+            bboxes = res[0][:, np.where(res[0][0][:, 2] > 0.5)]
+        return bboxes
 
-    def detect_face(self, init_frame):
+    def detect(self, init_frame):
         frame = init_frame.copy()
-        faces = self.get_face_pos(frame)
-        for face in faces[0][0]:
-            xmin, ymin, xmax, ymax = self.get_box(face, frame)
+        bboxes = self.get_pos(frame)
+        for bbox in bboxes[0][0]:
+            xmin, ymin, xmax, ymax = self.get_box(bbox, frame)
             cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
         return frame
 
 
-class ModelEstimateHeadpose(ModelFace):
+class ModelDetectFace(ModelDetect):
+    def __init__(self):
+        self.task = 'detect_face'
+        super().__init__(self.task)
+
+
+class ModelDetectBody(ModelDetect):
+    def __init__(self):
+        self.task = 'detect_body'
+        super().__init__(self.task)
+
+
+class ModelEstimateHeadpose(ModelDetect):
     def __init__(self):
         self.task = 'estimate_headpose'
         super().__init__(self.task)
@@ -173,7 +182,7 @@ class ModelEstimateHeadpose(ModelFace):
         return frame
 
 
-class ModelEmotionRecognition(ModelFace):
+class ModelEmotionRecognition(ModelDetect):
     def __init__(self):
         self.task = 'emotion_recognition'
         super().__init__(self.task)
@@ -194,7 +203,7 @@ class ModelEmotionRecognition(ModelFace):
         frame = init_frame.copy()
         for face in faces[0][0]:
             xmin, ymin, xmax, ymax = self.get_box(face, frame)
-            face_frame = self.crop_face_frame(frame, xmin, ymin, xmax, ymax)
+            face_frame = self.crop_bbox_frame(frame, xmin, ymin, xmax, ymax)
             if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
                 continue
             emotion = self.get_emotion(face_frame)
@@ -206,3 +215,4 @@ class ModelEmotionRecognition(ModelFace):
                         (int(xmin + (xmax - xmin) / 2), int(ymin - 10)),
                         cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 200), 2, cv2.LINE_AA)
         return frame
+
