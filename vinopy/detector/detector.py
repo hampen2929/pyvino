@@ -1,7 +1,7 @@
 
-from ..model.model_face import (ModelDetectFace,
-                                ModelEstimateHeadpose,
-                                ModelEmotionRecognition)
+from ..model.model_detect import (ModelDetectFace,
+                                  ModelEstimateHeadpose,
+                                  ModelEmotionRecognition)
 
 
 class Detector(object):
