@@ -1,9 +1,9 @@
 
-
+from vinopy.detector.detector import Detector
 from vinopy.model.model_detect import (ModelDetectFace,
-                                     ModelDetectBody,
-                                     ModelEstimateHeadpose,
-                                     ModelEmotionRecognition)
+                                       ModelDetectBody,
+                                       ModelEstimateHeadpose,
+                                       ModelEmotionRecognition)
 import cv2
 from PIL import Image
 import numpy as np
@@ -24,6 +24,8 @@ class TestModelDetectFace(TestModelDetect):
         frame = self.load_image()
         model = ModelDetectFace()
         faces = model.get_pos(frame)
+        detector = Detector('detect_face')
+        detector.compute(frame)
 
         faces_exp = np.array([[[[0.,  1.,  0.99999917,  0.8040396,  0.50772989,
                                  0.93906057,  0.74512625],
