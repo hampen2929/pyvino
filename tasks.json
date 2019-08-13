@@ -2,5 +2,5 @@
   "detect_face": "face-detection-adas-0001",
   "emotion_recognition": "emotions-recognition-retail-0003",
   "estimate_headpose": "head-pose-estimation-adas-0001",
-  "detect_person": "person-detection-retail-0002"
+  "detect_body": "person-detection-retail-0013"
 }
