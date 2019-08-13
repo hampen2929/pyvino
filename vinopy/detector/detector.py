@@ -12,13 +12,13 @@ class Detector(object):
 
     def _set_model(self):
         if self.task == 'detect_face':
-            self.model_df = ModelDetectFace('detect_face')
+            self.model_df = ModelDetectFace()
         elif self.task == 'emotion_recognition':
-            self.model_df = ModelDetectFace('detect_face')
-            self.model_er = ModelEmotionRecognition('emotion_recognition')
+            self.model_df = ModelDetectFace()
+            self.model_er = ModelEmotionRecognition()
         elif self.task == 'estimate_headpose':
-            self.model_df = ModelDetectFace('detect_face')
-            self.model_eh = ModelEstimateHeadpose('estimate_headpose')
+            self.model_df = ModelDetectFace()
+            self.model_eh = ModelEstimateHeadpose()
         else:
             raise NotImplementedError
 
