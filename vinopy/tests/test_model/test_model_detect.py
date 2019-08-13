@@ -1,6 +1,6 @@
 
 
-from vinopy.model.model_face import (ModelDetectFace,
+from vinopy.model.model_detect import (ModelDetectFace,
                                      ModelDetectBody,
                                      ModelEstimateHeadpose,
                                      ModelEmotionRecognition)
