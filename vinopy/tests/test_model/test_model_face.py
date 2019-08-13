@@ -5,7 +5,7 @@ from vinopy.model.model_face import (ModelDetectFace,
                                      ModelEmotionRecognition)
 from PIL import Image
 import numpy as np
-import pytest
+# import pytest
 
 TEST_DATA = './data/test/test.jpg'
 
@@ -18,10 +18,9 @@ class TestModelFace(object):
 
 
 class TestModelDetectFace(TestModelFace):
-    @pytest.mark.parametrize('task', ['detect_face'])
-    def test_get_face_pos(self, task):
+    def test_get_face_pos(self):
         frame = self.load_image()
-        model = ModelDetectFace(task)
+        model = ModelDetectFace()
         faces = model.get_face_pos(frame)
 
         faces_exp = np.array([[[[0.,  1.,  0.99999917,  0.8040396,  0.50772989,
@@ -40,11 +39,11 @@ class TestModelEstimateHeadpose(TestModelFace):
     def test_get_axis(self):
         frame = self.load_image()
 
-        model_df = ModelDetectFace('detect_face')
+        model_df = ModelDetectFace()
         model_df.get_frame_shape(frame)
         faces = model_df.get_face_pos(frame)
 
-        model_es = ModelEstimateHeadpose('estimate_headpose')
+        model_es = ModelEstimateHeadpose()
         headpose_exps = [(-7.8038163, 15.785929, -3.390882), 
                          (-12.603701, 9.402246, -11.0962925), 
                          (-5.01876, 23.120262, -1.7416985), 
@@ -63,14 +62,14 @@ class TestModelEstimateHeadpose(TestModelFace):
         pass
 
 class TestModelEmotionRecognition(TestModelFace):
-    def test_get_face_pos(self):
+    def test_get_emotion(self):
         frame = self.load_image()
 
-        model_df = ModelDetectFace('detect_face')
+        model_df = ModelDetectFace()
         model_df.get_frame_shape(frame)
         faces = model_df.get_face_pos(frame)
 
-        model_er = ModelEmotionRecognition('emotion_recognition')
+        model_er = ModelEmotionRecognition()
 
         emotions_exp = ['happy', 'happy', 'happy', 'happy']
         for face, emotion_exp in zip(faces[0][0], emotions_exp):

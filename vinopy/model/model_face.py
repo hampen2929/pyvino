@@ -25,6 +25,10 @@ class ModelFace(Model):
 
 
 class ModelDetectFace(ModelFace):
+    def __init__(self):
+        self.task = 'detect_face'
+        super().__init__(self.task)
+        
     def get_face_pos(self, init_frame):
         frame = init_frame.copy()
 
@@ -56,6 +60,10 @@ class ModelDetectFace(ModelFace):
 
 
 class ModelEstimateHeadpose(ModelFace):
+    def __init__(self):
+        self.task = 'estimate_headpose'
+        super().__init__(self.task)
+
     def _build_camera_matrix(self, center_of_face, focal_length):
 
         cx = int(center_of_face[0])
@@ -166,8 +174,9 @@ class ModelEstimateHeadpose(ModelFace):
 
 
 class ModelEmotionRecognition(ModelFace):
-    def __init__(self, task):
-        super().__init__(task)
+    def __init__(self):
+        self.task = 'emotion_recognition'
+        super().__init__(self.task)
         self.label = ('neutral', 'happy', 'sad', 'surprise', 'anger')
 
     def get_emotion(self, face_frame):
