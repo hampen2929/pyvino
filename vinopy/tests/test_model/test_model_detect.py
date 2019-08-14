@@ -12,6 +12,7 @@ import numpy as np
 TEST_FACE = './data/test/face.jpg'
 TEST_BODY = './data/test/person2.jpg'
 
+
 class TestModelDetect(object):
     def load_image(self, path_image=TEST_FACE):
         frame = np.array(Image.open(path_image))
@@ -24,19 +25,26 @@ class TestModelDetectFace(TestModelDetect):
         frame = self.load_image()
         model = ModelDetectFace()
         faces = model.get_pos(frame)
-        detector = Detector('detect_face')
-        detector.compute(frame)
 
-        faces_exp = np.array([[[[0.,  1.,  0.99999917,  0.8040396,  0.50772989,
-                                 0.93906057,  0.74512625],
-                                [0.,  1.,  0.99999273,  0.67415386,  0.20316961,
-                                 0.81081396,  0.42160091],
-                                [0.,  1.,  0.99998677,  0.34577927,  0.13760452,
-                                 0.47722587,  0.39774776],
-                                [0.,  1.,  0.99937373,  0.06222285,  0.2267226,
-                                 0.22237313,  0.46430075]]]], dtype=np.float32)
-
+        faces_exp = np.array([[[[0.        , 1.        , 0.99999917, 0.8044468 , 0.50868136, 0.9387975 , 0.74597126],
+                                [0.        , 1.        , 0.99999475, 0.6740358 , 0.20301963, 0.81081235, 0.42199725],
+                                [0.        , 1.        , 0.99998975, 0.34619942, 0.13755499, 0.47750208, 0.3995008 ],
+                                [0.        , 1.        , 0.999305  , 0.06173299, 0.2270025 , 0.22192575, 0.46406496]]]], dtype=np.float32)
+        
         np.testing.assert_almost_equal(faces, faces_exp)
+    
+    def test_predict(self):
+        frame = self.load_image()
+        model = ModelDetectFace()
+        preds = model.predict(frame)
+        preds_exp = {0: {'label': 1.0, 'conf': 0.99999917, 'bbox': (1206, 586, 1408, 860)}, 
+                     1: {'label': 1.0, 'conf': 0.9999927, 'bbox': (1011, 234, 1216, 486)}, 
+                     2: {'label': 1.0, 'conf': 0.99998677, 'bbox': (518, 158, 715, 459)}, 
+                     3: {'label': 1.0, 'conf': 0.99937373, 'bbox': (93, 261, 333, 536)}}
+        #for factor, factor_exp in (preds.items(), preds_exp.items()):
+            #assert 1 == 2
+
+        
 
 class TestModelDetectBody(TestModelDetect):
     def test_get_pos(self):
@@ -44,12 +52,11 @@ class TestModelDetectBody(TestModelDetect):
         model = ModelDetectBody()
         bboxes = model.get_pos(frame)
 
-        bboxes_exp = np.array([[[[0.       , 1.       , 0.9991504, 0.6607301,
-                                  0.2990044, 0.7968546, 0.8540128],
-                                 [0.       , 1.       , 0.9973748, 0.4410298,
-                                  0.3112628, 0.6126808, 0.8403662]]]])
-        
+        bboxes_exp = np.array([[[[0.        , 1.        , 0.9991472 , 0.6621982 , 0.30289605, 0.7962606 , 0.855718  ],
+                                 [0.        , 1.        , 0.9978035 , 0.4420939 , 0.3098352 , 0.6119692 , 0.84347534]]]])
+                          
         np.testing.assert_almost_equal(bboxes, bboxes_exp)
+
 
 class TestModelEstimateHeadpose(TestModelDetect):
     def test_get_axis(self):
@@ -60,10 +67,10 @@ class TestModelEstimateHeadpose(TestModelDetect):
         faces = model_df.get_pos(frame)
 
         model_es = ModelEstimateHeadpose()
-        headpose_exps = [(-7.8038163, 15.785929, -3.390882), 
-                         (-12.603701, 9.402246, -11.0962925), 
-                         (-5.01876, 23.120262, -1.7416985), 
-                         (2.898665, 26.77724, 15.251921)]
+        headpose_exps = [(-5.459803 , 17.332203 , -2.9661326), 
+                         (-11.929161,   9.150341, -10.437834), 
+                         (-5.246365, 22.493275, -2.398564), 
+                         (2.904601, 24.449804, 14.927055)]
         for face, headpose_exp in zip(faces[0][0], headpose_exps):
             xmin, ymin, xmax, ymax = model_df.get_box(face, frame)
             face_frame = model_df.crop_bbox_frame(frame,
@@ -76,6 +83,7 @@ class TestModelEstimateHeadpose(TestModelDetect):
 
     def test_get_center_face(self):
         pass
+
 
 class TestModelEmotionRecognition(TestModelDetect):
     def test_get_emotion(self):

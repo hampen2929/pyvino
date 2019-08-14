@@ -5,6 +5,7 @@ import cv2
 
 from vinopy.model.model import Model
 
+
 class ModelDetect(Model):
     def __init__(self, task):
         self.task = task
@@ -26,13 +27,11 @@ class ModelDetect(Model):
     def get_frame_shape(self, frame):
         self.frame_h, self.frame_w = frame.shape[:2]
     
-    def get_pos(self, init_frame):
-        frame = init_frame.copy()
-
+    def get_pos(self, frame):
         n, c, h, w = self.net.inputs[self.input_blob].shape
         self.shapes = (n, c, h, w)
-        scale = 640 / frame.shape[1]
-        frame = cv2.resize(frame, dsize=None, fx=scale, fy=scale)
+        # scale = 640 / frame.shape[1]
+        # frame = cv2.resize(frame, dsize=None, fx=scale, fy=scale)
 
         self.frame_h, self.frame_w = frame.shape[:2]
 
@@ -47,7 +46,25 @@ class ModelDetect(Model):
             bboxes = res[0][:, np.where(res[0][0][:, 2] > 0.5)]
         return bboxes
 
-    def detect(self, init_frame):
+    def predict(self, frame):
+        """predict the target
+        
+        Args:
+            frame (np.ndarray): image
+        
+        Returns:
+            dict: pred results
+        """
+        bboxes = self.get_pos(frame)
+        preds = {}
+        for bbox_num, bbox in enumerate(bboxes[0][0]):
+            preds[bbox_num] = {'label': bbox[1], 
+                               'conf': bbox[2], 
+                               'bbox': self.get_box(bbox, frame)}
+        return preds
+
+    def compute(self, init_frame):
+        # copy frame to prevent from overdraw results
         frame = init_frame.copy()
         bboxes = self.get_pos(frame)
         for bbox in bboxes[0][0]:
@@ -72,6 +89,9 @@ class ModelEstimateHeadpose(ModelDetect):
     def __init__(self):
         self.task = 'estimate_headpose'
         super().__init__(self.task)
+        self.scale = 50
+        self.focal_length = 950.0
+        self.model_df = ModelDetectFace()
 
     def _build_camera_matrix(self, center_of_face, focal_length):
 
@@ -162,23 +182,24 @@ class ModelEstimateHeadpose(ModelDetect):
             center_of_face = (xmin + face_frame.shape[1] / 2, ymin + face_frame.shape[0] / 2, 0)
         return center_of_face
 
-    def estimate_headpose(self, frame, faces):
-        # 4. Create Async Request
-        scale = 50
-        focal_length = 950.0
-        if len(faces) > 0:
-            for face in faces[0][0]:
-                xmin, ymin, xmax, ymax = self.get_box(face, frame)
-                face_frame = frame[ymin:ymax, xmin:xmax]
+    
 
-                if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
-                    continue
-                
-                yaw, pitch, roll = self.get_axis(face_frame)
-                center_of_face = self.get_center_face(face_frame, xmin, ymin)
-                self._draw_axes(frame, center_of_face, yaw,
-                                pitch, roll, scale, focal_length)
 
+    def compute(self, init_frame):
+        assert isinstance(init_frame, np.ndarray)
+        frame = init_frame.copy()
+        faces = self.model_df.get_pos(frame)
+
+        for face in faces[0][0]:
+            xmin, ymin, xmax, ymax = self.get_box(face, frame)
+            face_frame = frame[ymin:ymax, xmin:xmax]
+            if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
+                continue
+            yaw, pitch, roll = self.get_axis(face_frame)
+            center_of_face = self.get_center_face(face_frame, xmin, ymin)
+            scale = (face_frame.shape[0]**2 + face_frame.shape[1]**2)**0.5 / 2
+            self._draw_axes(frame, center_of_face, yaw,
+                            pitch, roll, scale, self.focal_length)
         return frame
 
 
@@ -187,6 +208,7 @@ class ModelEmotionRecognition(ModelDetect):
         self.task = 'emotion_recognition'
         super().__init__(self.task)
         self.label = ('neutral', 'happy', 'sad', 'surprise', 'anger')
+        self.model_df = ModelDetectFace()
 
     def get_emotion(self, face_frame):
         n, c, h, w = self.net.inputs[self.input_blob].shape
@@ -199,20 +221,23 @@ class ModelEmotionRecognition(ModelDetect):
             emotion = self.label[np.argmax(res[0])]
         return emotion
 
-    def emotion_recognition(self, init_frame, faces, rect):  # 4. Create Async Request
+    def compute(self, init_frame, rect=True):
+        assert isinstance(init_frame, np.ndarray)
         frame = init_frame.copy()
+
+        faces = self.model_df.get_pos(frame)
         for face in faces[0][0]:
             xmin, ymin, xmax, ymax = self.get_box(face, frame)
             face_frame = self.crop_bbox_frame(frame, xmin, ymin, xmax, ymax)
             if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
                 continue
             emotion = self.get_emotion(face_frame)
-            if rect:
-                frame = cv2.rectangle(frame,
-                                      (xmin, ymin), (xmax, ymax),
-                                      (0, 255, 0), 2)
             cv2.putText(frame, emotion,
                         (int(xmin + (xmax - xmin) / 2), int(ymin - 10)),
                         cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 200), 2, cv2.LINE_AA)
+            if rect:
+                frame = cv2.rectangle(frame,
+                                        (xmin, ymin), (xmax, ymax),
+                                        (0, 255, 0), 2)            
         return frame
 
