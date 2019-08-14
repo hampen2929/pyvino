@@ -1,10 +1,9 @@
-
+import pytest
 from vinopy.detector.detector import Detector
 from vinopy.model.model_detect import (ModelDetectFace,
                                        ModelDetectBody,
                                        ModelEstimateHeadpose,
                                        ModelEmotionRecognition)
-import cv2
 from PIL import Image
 import numpy as np
 # import pytest
@@ -16,22 +15,22 @@ TEST_BODY = './data/test/person2.jpg'
 class TestDetector(object):
     def load_image(self, path_image=TEST_FACE):
         frame = np.array(Image.open(path_image))
-        # resize image with keeping frame width
         return frame
 
-    def test_compute(self):
+    @pytest.mark.parametrize('task', ['detect_face', 
+                                      'detect_body',
+                                      'emotion_recognition',
+                                      'estimate_headpose'])
+    def test_compute(self, task):
+        detector = Detector(task)
         frame = self.load_image()
-        model = ModelDetectFace()
-        faces = model.get_pos(frame)
-        
-        detector = Detector('detect_face')
-        detector.compute(frame)
-
-        detector = Detector('detect_body')
-        detector.compute(frame)
-
-        detector = Detector('emotion_recognition')
-        detector.compute(frame)
-
-        detector = Detector('estimate_headpose')
-        detector.compute(frame)
+        detector.predict(frame)
+    
+    @pytest.mark.parametrize('task', ['detect_face', 
+                                      'detect_body',
+                                      'emotion_recognition',
+                                      'estimate_headpose'])
+    def test_predict(self, task):
+        detector = Detector(task)
+        frame = self.load_image()
+        detector.predict(frame)

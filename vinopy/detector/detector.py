@@ -1,4 +1,6 @@
 
+import numpy as np
+import PIL
 from ..model.model_detect import (ModelDetectFace,
                                   ModelDetectBody,
                                   ModelEstimateHeadpose,
@@ -6,37 +8,65 @@ from ..model.model_detect import (ModelDetectFace,
 
 
 class Detector(object):
-    def __init__(self, task, rect=True):
+    """ include model for detection
+    
+    Raises:
+        NotImplementedError: No task.
+
+    """
+    def __init__(self, task):
+        """construct models by specified task.
+        
+        Args:
+            task (str): task for constructing model
+        """
+        assert isinstance(task, str)
         self.task = task
-        self.rect = rect
         self._set_model()
 
     def _set_model(self):
         if self.task == 'detect_face':
-            self.model_df = ModelDetectFace()
+            self.model = ModelDetectFace()
         elif self.task == 'detect_body':
-            self.model_df = ModelDetectBody()
+            self.model = ModelDetectBody()
         elif self.task == 'emotion_recognition':
-            self.model_df = ModelDetectFace()
-            self.model_er = ModelEmotionRecognition()
+            self.model = ModelEmotionRecognition()
         elif self.task == 'estimate_headpose':
-            self.model_df = ModelDetectFace()
-            self.model_eh = ModelEstimateHeadpose()
+            self.model = ModelEstimateHeadpose()
         else:
             raise NotImplementedError
+    
+    def _validate_frame(self, frame):
+        """validate frame
+        
+        Args:
+            frame (any): input frame
+        
+        Returns:
+            [np.ndarray]: frame should be np.ndarray before computed
+        """
+        if type(frame) == PIL.JpegImagePlugin.JpegImageFile:
+            frame = np.asarray(frame)
+        elif type(frame) == np.ndarray:
+            pass
+        # TODO: implement mode frame type
+        assert isinstance(frame, np.ndarray)
+        return frame
+
+    def predict(self, frame):
+        preds = self.model.predict(frame)
+        assert type(preds) == dict
+        return preds
 
     def compute(self, frame):
-        if self.task == 'detect_face':
-            frame = self.model_df.detect(frame)
-        elif self.task == 'detect_body':
-            frame = self.model_df.detect(frame)
-        elif self.task == 'emotion_recognition':
-            faces = self.model_df.get_pos(frame)
-            frame = self.model_er.emotion_recognition(frame, faces, rect=self.rect)
-        elif self.task == 'estimate_headpose':
-            faces = self.model_df.get_pos(frame)
-            frame = self.model_eh.estimate_headpose(frame, faces)
-        else:
-            raise NotImplementedError
-
+        """predict and draw to frame
+        
+        Args:
+            frame (np.asarray): frame to compute
+        
+        Returns:
+            [np.asarray]: frame with estimated results
+        """
+        frame = self._validate_frame(frame)
+        frame = self.model.compute(frame)
         return frame
