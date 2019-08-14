@@ -1,6 +1,6 @@
 storage/
 .ipynb_checkpoints/
 __pycache__
-intel_models/
+# intel_models/
 .vscode
 /*.ipynb
