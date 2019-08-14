@@ -17,6 +17,7 @@ class Model(object):
         # Load Model
         self._set_ieplugin()
         self._get_io_blob()
+        self._get_shape()
 
     def _set_ieplugin(self):
         plugin = IEPlugin(device=self.device, plugin_dirs=None)
@@ -37,10 +38,15 @@ class Model(object):
         self.input_blob = next(iter(self.net.inputs))
         self.out_blob = next(iter(self.net.outputs))
     
+    def _get_shape(self):
+        n, c, h, w = self.net.inputs[self.input_blob].shape
+        self.shapes = (n, c, h, w)
+
     def _in_frame(self, frame, n, c, h, w):
         """
         transform frame for input data 
         """
+        # TODO: include n, c, h, w with "n, c, h, w = self.shapes"
         in_frame = cv2.resize(frame, (w, h))
         in_frame = in_frame.transpose((2, 0, 1))
         in_frame = in_frame.reshape((n, c, h, w))

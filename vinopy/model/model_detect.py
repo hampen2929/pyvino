@@ -18,6 +18,8 @@ class ModelDetect(Model):
                                     frame_w,
                                     frame_h])
         xmin, ymin, xmax, ymax = box.astype("int")
+        self.xmin = xmin
+        self.ymin = ymin
         return xmin, ymin, xmax, ymax
 
     def crop_bbox_frame(self, frame, xmin, ymin, xmax, ymax):
@@ -28,8 +30,7 @@ class ModelDetect(Model):
         self.frame_h, self.frame_w = frame.shape[:2]
     
     def get_pos(self, frame):
-        n, c, h, w = self.net.inputs[self.input_blob].shape
-        self.shapes = (n, c, h, w)
+        n, c, h, w = self.shapes
         # scale = 640 / frame.shape[1]
         # frame = cv2.resize(frame, dsize=None, fx=scale, fy=scale)
 
@@ -164,7 +165,7 @@ class ModelEstimateHeadpose(ModelDetect):
         return frame
 
     def get_axis(self, face_frame):
-        n, c, h, w = self.net.inputs[self.input_blob].shape
+        n, c, h, w = self.shapes
         in_frame = self._in_frame(face_frame, n, c, h, w)
         self.exec_net.start_async(request_id=0, inputs={self.input_blob: in_frame})
         if self.exec_net.requests[0].wait(-1) == 0:
@@ -178,12 +179,27 @@ class ModelEstimateHeadpose(ModelDetect):
         return yaw, pitch, roll
 
     def get_center_face(self, face_frame, xmin, ymin):
+        n, c, h, w = self.shapes
+        in_frame = self._in_frame(face_frame, n, c, h, w)
+        self.exec_net.start_async(request_id=0, inputs={self.input_blob: in_frame})
         if self.exec_net.requests[0].wait(-1) == 0:
             center_of_face = (xmin + face_frame.shape[1] / 2, ymin + face_frame.shape[0] / 2, 0)
         return center_of_face
 
-    
-
+    def predict(self, init_frame):
+        frame = init_frame.copy()
+        faces = self.model_df.get_pos(frame)
+        preds = {}
+        for face_num, face in enumerate(faces[0][0]):
+            xmin, ymin, xmax, ymax = self.get_box(face, frame)
+            face_frame = frame[ymin:ymax, xmin:xmax]
+            if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
+                continue
+            yaw, pitch, roll = self.get_axis(face_frame)
+            center_of_face = self.get_center_face(face_frame, xmin, ymin)
+            preds[face_num] = {'yaw': yaw, 'pitch': pitch, 'roll': roll, 
+                               'center_of_face': center_of_face}
+        return preds
 
     def compute(self, init_frame):
         assert isinstance(init_frame, np.ndarray)
@@ -211,7 +227,7 @@ class ModelEmotionRecognition(ModelDetect):
         self.model_df = ModelDetectFace()
 
     def get_emotion(self, face_frame):
-        n, c, h, w = self.net.inputs[self.input_blob].shape
+        n, c, h, w = self.shapes
         in_frame = self._in_frame(face_frame, n, c, h, w)
         self.exec_net.start_async(request_id=0, inputs={
             self.input_blob: in_frame})
@@ -221,6 +237,20 @@ class ModelEmotionRecognition(ModelDetect):
             emotion = self.label[np.argmax(res[0])]
         return emotion
 
+    def predict(self, init_frame):
+        assert isinstance(init_frame, np.ndarray)
+        frame = init_frame.copy()
+        faces = self.model_df.get_pos(frame)
+        preds = {}
+        for face_num, face in enumerate(faces[0][0]):
+            xmin, ymin, xmax, ymax = self.get_box(face, frame)
+            face_frame = self.crop_bbox_frame(frame, xmin, ymin, xmax, ymax)
+            if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
+                continue
+            emotion = self.get_emotion(face_frame)
+            preds[face_num] = emotion
+        return preds
+    
     def compute(self, init_frame, rect=True):
         assert isinstance(init_frame, np.ndarray)
         frame = init_frame.copy()

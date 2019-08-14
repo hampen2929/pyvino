@@ -37,13 +37,14 @@ class TestModelDetectFace(TestModelDetect):
         frame = self.load_image()
         model = ModelDetectFace()
         preds = model.predict(frame)
-        preds_exp = {0: {'label': 1.0, 'conf': 0.99999917, 'bbox': (1206, 586, 1408, 860)}, 
-                     1: {'label': 1.0, 'conf': 0.9999927, 'bbox': (1011, 234, 1216, 486)}, 
-                     2: {'label': 1.0, 'conf': 0.99998677, 'bbox': (518, 158, 715, 459)}, 
-                     3: {'label': 1.0, 'conf': 0.99937373, 'bbox': (93, 261, 333, 536)}}
-        #for factor, factor_exp in (preds.items(), preds_exp.items()):
-            #assert 1 == 2
-
+        preds_exp = {0: {'label': 1.0, 'conf': 0.99999917, 'bbox': (1206, 587, 1408, 861)}, 
+                     1: {'label': 1.0, 'conf': 0.99999475, 'bbox': (1011, 234, 1216, 487)}, 
+                     2: {'label': 1.0, 'conf': 0.99998975, 'bbox': (519, 158, 716, 461)}, 
+                     3: {'label': 1.0, 'conf': 0.999305,   'bbox': (92, 262, 332, 535)}}
+        for num in range(len(preds)):
+            assert preds[num]['label'] == preds_exp[num]['label']
+            np.testing.assert_almost_equal(preds[num]['conf'], preds_exp[num]['conf'])
+            np.testing.assert_almost_equal(preds[num]['bbox'], preds_exp[num]['bbox'])
         
 
 class TestModelDetectBody(TestModelDetect):
@@ -57,6 +58,19 @@ class TestModelDetectBody(TestModelDetect):
                           
         np.testing.assert_almost_equal(bboxes, bboxes_exp)
 
+    def test_predict(self):
+        frame = self.load_image()
+        model = ModelDetectFace()
+        preds = model.predict(frame)
+        preds_exp = {0: {'label': 1.0, 'conf': 0.99999917, 'bbox': (1206, 587, 1408, 861)}, 
+                     1: {'label': 1.0, 'conf': 0.99999475, 'bbox': (1011, 234, 1216, 487)}, 
+                     2: {'label': 1.0, 'conf': 0.99998975, 'bbox': (519, 158, 716, 461)}, 
+                     3: {'label': 1.0, 'conf': 0.999305, 'bbox': (92, 262, 332, 535)}}
+        
+        for num in range(len(preds)):
+            assert preds[num]['label'] == preds_exp[num]['label']
+            np.testing.assert_almost_equal(preds[num]['conf'], preds_exp[num]['conf'])
+            np.testing.assert_almost_equal(preds[num]['bbox'], preds_exp[num]['bbox'])
 
 class TestModelEstimateHeadpose(TestModelDetect):
     def test_get_axis(self):
@@ -82,7 +96,24 @@ class TestModelEstimateHeadpose(TestModelDetect):
             np.testing.assert_almost_equal(headpose, headpose_exp)
 
     def test_get_center_face(self):
-        pass
+        frame = self.load_image(TEST_FACE)
+
+        model_df = ModelDetectFace()
+        model_df.get_frame_shape(frame)
+        faces = model_df.get_pos(frame)
+
+        model_es = ModelEstimateHeadpose()
+        exps = [(1307.0, 724.0, 0), 
+                (1113.5, 360.5, 0), 
+                (617.5, 309.5, 0), 
+                (212.0, 398.5, 0)]
+        for face, exp in zip(faces[0][0], exps):
+            xmin, ymin, xmax, ymax = model_df.get_box(face, frame)
+            face_frame = model_df.crop_bbox_frame(frame,
+                                                  xmin, ymin, xmax, ymax)
+            center = model_es.get_center_face(face_frame, xmin, ymin)
+            
+            np.testing.assert_almost_equal(center, exp)    
 
 
 class TestModelEmotionRecognition(TestModelDetect):
