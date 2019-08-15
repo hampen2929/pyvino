@@ -33,10 +33,10 @@ class TestDetectorFace(TestDetector):
         
         np.testing.assert_almost_equal(faces, faces_exp)
     
-    def test_predict(self):
+    def test_compute_pred(self):
         frame = self.load_image()
         detector = DetectorFace()
-        preds = detector.predict(frame)
+        preds = detector.compute(frame, pred_flag=True)
         preds_exp = {0: {'label': 1.0, 'conf': 0.99999917, 'bbox': (1206, 587, 1408, 861)}, 
                      1: {'label': 1.0, 'conf': 0.99999475, 'bbox': (1011, 234, 1216, 487)}, 
                      2: {'label': 1.0, 'conf': 0.99998975, 'bbox': (519, 158, 716, 461)}, 
@@ -58,10 +58,10 @@ class TestDetectorBody(TestDetector):
                           
         np.testing.assert_almost_equal(bboxes, bboxes_exp)
 
-    def test_predict(self):
+    def test_compute_pred(self):
         frame = self.load_image()
         detector = DetectorFace()
-        preds = detector.predict(frame)
+        preds = detector.compute(frame, pred_flag=True)
         preds_exp = {0: {'label': 1.0, 'conf': 0.99999917, 'bbox': (1206, 587, 1408, 861)}, 
                      1: {'label': 1.0, 'conf': 0.99999475, 'bbox': (1011, 234, 1216, 487)}, 
                      2: {'label': 1.0, 'conf': 0.99998975, 'bbox': (519, 158, 716, 461)}, 

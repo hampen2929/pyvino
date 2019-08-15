@@ -47,31 +47,21 @@ class DetectorObject(Detector):
             bboxes = res[0][:, np.where(res[0][0][:, 2] > 0.5)]
         return bboxes
 
-    def predict(self, frame):
-        """predict the target
-        
-        Args:
-            frame (np.ndarray): image
-        
-        Returns:
-            dict: pred results
-        """
-        bboxes = self.get_pos(frame)
-        preds = {}
-        for bbox_num, bbox in enumerate(bboxes[0][0]):
-            preds[bbox_num] = {'label': bbox[1], 
-                               'conf': bbox[2], 
-                               'bbox': self.get_box(bbox, frame)}
-        return preds
-
-    def compute(self, init_frame):
+    def compute(self, init_frame, pred_flag=False, frame_flag=False):
         # copy frame to prevent from overdraw results
         frame = init_frame.copy()
         bboxes = self.get_pos(frame)
-        for bbox in bboxes[0][0]:
+        results = {}
+        for bbox_num, bbox in enumerate(bboxes[0][0]):
             xmin, ymin, xmax, ymax = self.get_box(bbox, frame)
-            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
-        return frame
+            if pred_flag:            
+                results[bbox_num] = {'label': bbox[1], 
+                                     'conf': bbox[2], 
+                                     'bbox': (xmin, ymin, xmax, ymax)}
+            if frame_flag:
+                cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
+                results[bbox_num] = {'frame': frame}
+        return results
 
 
 class DetectorFace(DetectorObject):
@@ -186,37 +176,27 @@ class DetectorHeadpose(DetectorObject):
             center_of_face = (xmin + face_frame.shape[1] / 2, ymin + face_frame.shape[0] / 2, 0)
         return center_of_face
 
-    def predict(self, init_frame):
+    def compute(self, init_frame, pred_flag=False, frame_flag=False):
         frame = init_frame.copy()
         faces = self.detector_face.get_pos(frame)
-        preds = {}
+        results = {}
         for face_num, face in enumerate(faces[0][0]):
             xmin, ymin, xmax, ymax = self.get_box(face, frame)
             face_frame = frame[ymin:ymax, xmin:xmax]
-            if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
-                continue
             yaw, pitch, roll = self.get_axis(face_frame)
             center_of_face = self.get_center_face(face_frame, xmin, ymin)
-            preds[face_num] = {'yaw': yaw, 'pitch': pitch, 'roll': roll, 
-                               'center_of_face': center_of_face}
-        return preds
-
-    def compute(self, init_frame):
-        assert isinstance(init_frame, np.ndarray)
-        frame = init_frame.copy()
-        faces = self.detector_face.get_pos(frame)
-
-        for face in faces[0][0]:
-            xmin, ymin, xmax, ymax = self.get_box(face, frame)
-            face_frame = frame[ymin:ymax, xmin:xmax]
             if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
                 continue
-            yaw, pitch, roll = self.get_axis(face_frame)
-            center_of_face = self.get_center_face(face_frame, xmin, ymin)
-            scale = (face_frame.shape[0]**2 + face_frame.shape[1]**2)**0.5 / 2
-            self._draw_axes(frame, center_of_face, yaw,
-                            pitch, roll, scale, self.focal_length)
-        return frame
+            if pred_flag:
+                results[face_num] = {'bbox': (xmin, ymin, xmax, ymax),
+                                     'yaw': yaw, 'pitch': pitch, 'roll': roll, 
+                                     'center_of_face': center_of_face}
+            if frame_flag:
+                scale = (face_frame.shape[0]**2 + face_frame.shape[1]**2)**0.5 / 2
+                self._draw_axes(frame, center_of_face, yaw,
+                                pitch, roll, scale, self.focal_length)
+                results[face_num] = {'frame': frame}
+        return results
 
 
 class DetectorEmotion(DetectorObject):
@@ -237,39 +217,31 @@ class DetectorEmotion(DetectorObject):
             emotion = self.label[np.argmax(res[0])]
         return emotion
 
-    def predict(self, init_frame):
+    def compute(self, init_frame, pred_flag=False, frame_flag=False, rect=False):
         assert isinstance(init_frame, np.ndarray)
         frame = init_frame.copy()
         faces = self.detector_face.get_pos(frame)
-        preds = {}
+        results = {}
         for face_num, face in enumerate(faces[0][0]):
             xmin, ymin, xmax, ymax = self.get_box(face, frame)
             face_frame = self.crop_bbox_frame(frame, xmin, ymin, xmax, ymax)
             if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
                 continue
-            emotion = self.get_emotion(face_frame)
-            preds[face_num] = emotion
-        return preds
-    
-    def compute(self, init_frame, rect=True):
-        assert isinstance(init_frame, np.ndarray)
-        frame = init_frame.copy()
-
-        faces = self.detector_face.get_pos(frame)
-        for face in faces[0][0]:
-            xmin, ymin, xmax, ymax = self.get_box(face, frame)
-            face_frame = self.crop_bbox_frame(frame, xmin, ymin, xmax, ymax)
-            if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
-                continue
-            emotion = self.get_emotion(face_frame)
-            cv2.putText(frame, emotion,
-                        (int(xmin + (xmax - xmin) / 2), int(ymin - 10)),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 200), 2, cv2.LINE_AA)
-            if rect:
-                frame = cv2.rectangle(frame,
-                                        (xmin, ymin), (xmax, ymax),
-                                        (0, 255, 0), 2)            
-        return frame
+            if pred_flag:
+                emotion = self.get_emotion(face_frame)
+                results[face_num] = {'bbox': (xmin, ymin, xmax, ymax),
+                                     'emotion': emotion}
+            if frame_flag:
+                emotion = self.get_emotion(face_frame)
+                cv2.putText(frame, emotion,
+                            (int(xmin + (xmax - xmin) / 2), int(ymin - 10)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 200), 2, cv2.LINE_AA)
+                if rect:
+                    frame = cv2.rectangle(frame,
+                                            (xmin, ymin), (xmax, ymax),
+                                            (0, 255, 0), 2)
+                results[face_num] = {'frame': frame}
+        return results
 
 
 class DetectorHumanPose(Detector):
