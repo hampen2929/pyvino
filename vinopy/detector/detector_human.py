@@ -225,14 +225,13 @@ class DetectorEmotion(DetectorObject):
         for face_num, face in enumerate(faces[0][0]):
             xmin, ymin, xmax, ymax = self.get_box(face, frame)
             face_frame = self.crop_bbox_frame(frame, xmin, ymin, xmax, ymax)
+            emotion = self.get_emotion(face_frame)
             if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
                 continue
             if pred_flag:
-                emotion = self.get_emotion(face_frame)
                 results[face_num] = {'bbox': (xmin, ymin, xmax, ymax),
                                      'emotion': emotion}
             if frame_flag:
-                emotion = self.get_emotion(face_frame)
                 cv2.putText(frame, emotion,
                             (int(xmin + (xmax - xmin) / 2), int(ymin - 10)),
                             cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 200), 2, cv2.LINE_AA)
