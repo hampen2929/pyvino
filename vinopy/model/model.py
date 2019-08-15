@@ -1,53 +1,73 @@
 
-import os
-import cv2
-from openvino.inference_engine import IENetwork, IEPlugin
-from vinopy.util.config import (DEVICE, MODEL_DIR, MODEL_FP,
-                                CPU_EXTENSION, TASKS)
+import numpy as np
+import PIL
+
+from ..detector.detector_human import (DetectorFace,
+                                       DetectorBody,
+                                       DetectorHeadpose,
+                                       DetectorEmotion)
 
 
 class Model(object):
-    # TODO: load from config
-    def __init__(self, task):
-        self.task = task
-        self.device = DEVICE
-        self._set_model_path()
-        # Read IR
-        self.net = IENetwork(model=self.model_xml, weights=self.model_bin)
-        # Load Model
-        self._set_ieplugin()
-        self._get_io_blob()
-        self._get_shape()
-
-    def _set_ieplugin(self):
-        plugin = IEPlugin(device=self.device, plugin_dirs=None)
-        if DEVICE == "CPU":
-            plugin.add_cpu_extension(CPU_EXTENSION)
-        self.exec_net = plugin.load(network=self.net, num_requests=2)
-
-    def _set_model_path(self):
-        model_name = TASKS[self.task]
-        path_model_dir = os.path.join(MODEL_DIR, model_name, MODEL_FP)
-
-        self.model_xml = os.path.join(
-            path_model_dir, model_name + '.xml')
-        self.model_bin = os.path.join(
-            path_model_dir, model_name + ".bin")
-
-    def _get_io_blob(self):
-        self.input_blob = next(iter(self.net.inputs))
-        self.out_blob = next(iter(self.net.outputs))
+    """ include model for detection
     
-    def _get_shape(self):
-        n, c, h, w = self.net.inputs[self.input_blob].shape
-        self.shapes = (n, c, h, w)
+    Raises:
+        NotImplementedError: No task.
 
-    def _in_frame(self, frame, n, c, h, w):
+    """
+    def __init__(self, task):
+        """construct models by specified task.
+        
+        Args:
+            task (str): task for constructing model
         """
-        transform frame for input data 
+        assert isinstance(task, str)
+        self.task = task
+        self._set_detector()
+
+    def _set_detector(self):
+        if self.task == 'detect_face':
+            self.detector = DetectorFace()
+        elif self.task == 'detect_body':
+            self.detector = DetectorBody()
+        elif self.task == 'emotion_recognition':
+            self.detector = DetectorEmotion()
+        elif self.task == 'estimate_headpose':
+            self.detector = DetectorHeadpose()
+        else:
+            raise NotImplementedError
+    
+    def _validate_frame(self, frame):
+        """validate frame
+        
+        Args:
+            frame (any): input frame
+        
+        Returns:
+            [np.ndarray]: frame should be np.ndarray before computed
         """
-        # TODO: include n, c, h, w with "n, c, h, w = self.shapes"
-        in_frame = cv2.resize(frame, (w, h))
-        in_frame = in_frame.transpose((2, 0, 1))
-        in_frame = in_frame.reshape((n, c, h, w))
-        return in_frame
+        if type(frame) == PIL.JpegImagePlugin.JpegImageFile:
+            frame = np.asarray(frame)
+        elif type(frame) == np.ndarray:
+            pass
+        # TODO: implement mode frame type
+        assert isinstance(frame, np.ndarray)
+        return frame
+
+    def predict(self, frame):
+        preds = self.detector.predict(frame)
+        assert type(preds) == dict
+        return preds
+
+    def compute(self, frame):
+        """predict and draw to frame
+        
+        Args:
+            frame (np.asarray): frame to compute
+        
+        Returns:
+            [np.asarray]: frame with estimated results
+        """
+        frame = self._validate_frame(frame)
+        frame = self.detector.compute(frame)
+        return frame

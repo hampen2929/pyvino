@@ -3,10 +3,10 @@ import numpy as np
 import math
 import cv2
 
-from vinopy.model.model import Model
+from vinopy.detector.detector import Detector
 
 
-class ModelDetect(Model):
+class DetectorObject(Detector):
     def __init__(self, task):
         self.task = task
         super().__init__(self.task)
@@ -74,25 +74,25 @@ class ModelDetect(Model):
         return frame
 
 
-class ModelDetectFace(ModelDetect):
+class DetectorFace(DetectorObject):
     def __init__(self):
         self.task = 'detect_face'
         super().__init__(self.task)
 
 
-class ModelDetectBody(ModelDetect):
+class DetectorBody(DetectorObject):
     def __init__(self):
         self.task = 'detect_body'
         super().__init__(self.task)
 
 
-class ModelEstimateHeadpose(ModelDetect):
+class DetectorHeadpose(DetectorObject):
     def __init__(self):
         self.task = 'estimate_headpose'
         super().__init__(self.task)
         self.scale = 50
         self.focal_length = 950.0
-        self.model_df = ModelDetectFace()
+        self.detector_face = DetectorFace()
 
     def _build_camera_matrix(self, center_of_face, focal_length):
 
@@ -188,7 +188,7 @@ class ModelEstimateHeadpose(ModelDetect):
 
     def predict(self, init_frame):
         frame = init_frame.copy()
-        faces = self.model_df.get_pos(frame)
+        faces = self.detector_face.get_pos(frame)
         preds = {}
         for face_num, face in enumerate(faces[0][0]):
             xmin, ymin, xmax, ymax = self.get_box(face, frame)
@@ -204,7 +204,7 @@ class ModelEstimateHeadpose(ModelDetect):
     def compute(self, init_frame):
         assert isinstance(init_frame, np.ndarray)
         frame = init_frame.copy()
-        faces = self.model_df.get_pos(frame)
+        faces = self.detector_face.get_pos(frame)
 
         for face in faces[0][0]:
             xmin, ymin, xmax, ymax = self.get_box(face, frame)
@@ -219,12 +219,12 @@ class ModelEstimateHeadpose(ModelDetect):
         return frame
 
 
-class ModelEmotionRecognition(ModelDetect):
+class DetectorEmotion(DetectorObject):
     def __init__(self):
         self.task = 'emotion_recognition'
         super().__init__(self.task)
         self.label = ('neutral', 'happy', 'sad', 'surprise', 'anger')
-        self.model_df = ModelDetectFace()
+        self.detector_face = DetectorFace()
 
     def get_emotion(self, face_frame):
         n, c, h, w = self.shapes
@@ -240,7 +240,7 @@ class ModelEmotionRecognition(ModelDetect):
     def predict(self, init_frame):
         assert isinstance(init_frame, np.ndarray)
         frame = init_frame.copy()
-        faces = self.model_df.get_pos(frame)
+        faces = self.detector_face.get_pos(frame)
         preds = {}
         for face_num, face in enumerate(faces[0][0]):
             xmin, ymin, xmax, ymax = self.get_box(face, frame)
@@ -255,7 +255,7 @@ class ModelEmotionRecognition(ModelDetect):
         assert isinstance(init_frame, np.ndarray)
         frame = init_frame.copy()
 
-        faces = self.model_df.get_pos(frame)
+        faces = self.detector_face.get_pos(frame)
         for face in faces[0][0]:
             xmin, ymin, xmax, ymax = self.get_box(face, frame)
             face_frame = self.crop_bbox_frame(frame, xmin, ymin, xmax, ymax)
@@ -272,11 +272,11 @@ class ModelEmotionRecognition(ModelDetect):
         return frame
 
 
-class ModelEstimateHumanPose(ModelDetect):
+class DetectorHumanPose(Detector):
     def __init__(self):
         self.task = 'estimate_humanpose'
         super().__init__(self.task)
-        self.model_df = ModelDetectBody()
+        self.detector_body = DetectorDetectBody()
     
     def get_res(self, frame):
         n, c, h, w = self.shapes
