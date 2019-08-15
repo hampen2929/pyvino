@@ -271,3 +271,23 @@ class ModelEmotionRecognition(ModelDetect):
                                         (0, 255, 0), 2)            
         return frame
 
+
+class ModelEstimateHumanPose(ModelDetect):
+    def __init__(self):
+        self.task = 'estimate_humanpose'
+        super().__init__(self.task)
+        self.model_df = ModelDetectBody()
+    
+    def get_res(self, frame):
+        n, c, h, w = self.shapes
+        in_frame = self._in_frame(frame, n, c, h, w)
+        self.exec_net.start_async(request_id=0, inputs={
+            self.input_blob: in_frame})
+
+        if self.exec_net.requests[0].wait(-1) == 0:
+            res = self.exec_net.requests[0].outputs[self.out_blob]
+        return res
+
+    def get_heatmap(sefl):
+        pass
+    
