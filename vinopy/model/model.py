@@ -55,7 +55,7 @@ class Model(object):
         return frame
 
     def predict(self, frame):
-        preds = self.detector.predict(frame)
+        preds = self.detector.compute(frame, pred_flag=True)
         assert type(preds) == dict
         return preds
 
@@ -69,5 +69,5 @@ class Model(object):
             [np.asarray]: frame with estimated results
         """
         frame = self._validate_frame(frame)
-        frame = self.detector.compute(frame)
+        frame = self.detector.compute(frame, frame_flag=True)
         return frame

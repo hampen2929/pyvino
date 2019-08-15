@@ -21,16 +21,16 @@ class TestModel(object):
                                       'detect_body',
                                       'emotion_recognition',
                                       'estimate_headpose'])
-    def test_compute(self, task):
+    def test_predict(self, task):
         model = Model(task)
         frame = self.load_image()
-        model.compute(frame)
+        model.predict(frame)
     
     @pytest.mark.parametrize('task', ['detect_face', 
                                       'detect_body',
                                       'emotion_recognition',
                                       'estimate_headpose'])
-    def test_predict(self, task):
+    def test_compute(self, task):
         model = Model(task)
         frame = self.load_image()
-        model.predict(frame)
+        model.compute(frame)
