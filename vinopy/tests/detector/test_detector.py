@@ -1,13 +1,9 @@
 
 from vinopy.model.model import Model
-from vinopy.detector.detector_human import (DetectorFace,
-                                           DetectorBody,
-                                           DetectorHeadpose,
-                                           DetectorEmotion)
-import cv2
+from vinopy.detector.detector_human import *
 from PIL import Image
 import numpy as np
-# import pytest
+
 
 TEST_FACE = './data/test/face.jpg'
 TEST_BODY = './data/test/person2.jpg'
@@ -72,6 +68,7 @@ class TestDetectorBody(TestDetector):
             np.testing.assert_almost_equal(preds[num]['conf'], preds_exp[num]['conf'])
             np.testing.assert_almost_equal(preds[num]['bbox'], preds_exp[num]['bbox'])
 
+
 class TestDetectorHeadpose(TestDetector):
     def test_get_axis(self):
         frame = self.load_image()
@@ -134,3 +131,19 @@ class TestDetectorEmotion(TestDetector):
             emotion = detector_emotion.get_emotion(face_frame)
 
             assert emotion == emotion_exp
+
+
+class TestDetectorHumanPose(TestDetector):
+    def test_compute(self):
+        frame = self.load_image(TEST_BODY)
+
+        detector = DetectorHumanPose()
+        results = detector.compute(frame, pred_flag=True)
+
+        exps = np.asarray([[[768., 275.],[768., 325.],[730., 325.],[712., 375.],[730., 400.],[805., 325.],[824., 375.],[805., 400.],[749., 450.],
+                            [749., 550.],[749., 625.],[786., 450.],[786., 525.],[768., 625.],[768., 250.],[768., 250.],[749., 275.],[786., 250.],[  0.,   0.]],
+                           [[562., 300.],[562., 325.],[524., 325.],[487., 375.],[487., 450.],[618., 325.],[618., 400.],[618., 450.],[524., 450.],
+                            [524., 525.],[543., 625.],[580., 450.],[580., 525.],[580., 600.],[562., 275.],[562., 275.],[543., 275.],[580., 275.],[0., 0.]]])
+
+        for num, exp in zip(results, exps):
+            np.testing.assert_almost_equal(results[num]['points'], exp)

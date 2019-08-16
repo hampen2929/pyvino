@@ -272,24 +272,46 @@ class DetectorHumanPose(Detector):
         heatmaps = res['Mconv7_stage2_L2']
         return heatmaps
 
+    def points_conf(self, frame, conf):
+
+        return (x, y)
+
     def get_points(self, frame):
-        frame_width = frame.shape[1]
-        frame_height = frame.shape[0]
+        """get one person's pose points.
+
+        Args:
+            frame (np.ndarray): image include only one person. other part should be masked.
+
+        Returns (np.ndarray): human jointt points
+
+        """
         heatmaps = self._get_heatmaps(frame)
-        points = []
+        points = np.zeros((len(self.BODY_PARTS), 2))
         for num_parts in range(len(self.BODY_PARTS)):
             # Slice heatmap of corresponging body's part.
             heatMap = heatmaps[0, num_parts, :, :]
-
             _, conf, _, point = cv2.minMaxLoc(heatMap)
-            x = (frame_width * point[0]) / heatmaps.shape[3]
-            y = (frame_height * point[1]) / heatmaps.shape[2]
+            frame_width = frame.shape[1]
+            frame_height = frame.shape[0]
 
+            x, y = np.nan, np.nan
             # Add a point if it's confidence is higher than threshold.
-            points.append([int(x), int(y)] if conf > self.thr_point else [np.nan, np.nan])
+            if conf > self.thr_point:
+                x = int((frame_width * point[0]) / heatmaps.shape[3])
+                y = int((frame_height * point[1]) / heatmaps.shape[2])
+            points[num_parts] = x, y
         return points
 
     def draw_pose(self, init_frame, points):
+        """draw pose points and line to frame
+
+        Args:
+            init_frame: frame to draw
+            points: joints position values for all person
+
+        Returns:
+
+        """
         frame = init_frame.copy()
         for pair in self.POSE_PAIRS:
             partFrom = pair[0]
@@ -312,8 +334,8 @@ class DetectorHumanPose(Detector):
         """ frame include multi person.
 
         Args:
-            pred_flag: whether return pred results
-            frame_flag: whether return frame
+            pred_flag (bool): whether return pred results
+            frame_flag (bool): whether return frame
 
         Returns (dict): detected human pose points and drawn frame selectively.
 
@@ -330,11 +352,10 @@ class DetectorHumanPose(Detector):
             canvas = canvas_org.copy()
             canvas[ymin:ymax, xmin:xmax] = bbox_frame
             points = self.get_points(canvas)
-            points = np.asarray(points)
+            # points = np.asarray(points)
             if pred_flag:
                 results[bbox_num] = {'points': points, 'bbox': (xmin, ymin, xmax, ymax)}
             if frame_flag:
-                # TODO: draws points to original frame
                 frame = self.draw_pose(frame, points)
         if frame_flag:
             results['frame'] = frame
