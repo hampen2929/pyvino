@@ -39,12 +39,15 @@ class Detector(object):
         self.out_blob = next(iter(self.net.outputs))
     
     def _get_shape(self):
+        """get shape for network input
+
+        """
         n, c, h, w = self.net.inputs[self.input_blob].shape
         self.shapes = (n, c, h, w)
 
     def _in_frame(self, frame, n, c, h, w):
         """
-        transform frame for input data 
+        transform frame for network input shape
         """
         # TODO: include n, c, h, w with "n, c, h, w = self.shapes"
         in_frame = cv2.resize(frame, (w, h))
