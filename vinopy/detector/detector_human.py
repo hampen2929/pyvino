@@ -263,6 +263,7 @@ class DetectorHumanPose(Detector):
     def _get_heatmaps(self, frame):
         # frame include only one person
         n, c, h, w = self.shapes
+        # TODO: image shape ratio should be remained
         in_frame = self._in_frame(frame, n, c, h, w)
         self.exec_net.start_async(request_id=0, inputs={self.input_blob: in_frame})
         if self.exec_net.requests[0].wait(-1) == 0:
@@ -285,8 +286,7 @@ class DetectorHumanPose(Detector):
             y = (frame_height * point[1]) / heatmaps.shape[2]
 
             # Add a point if it's confidence is higher than threshold.
-            # points.append((int(x), int(y)))
-            points.append([int(x), int(y)] if conf > self.thr_point else [None, None])
+            points.append([int(x), int(y)] if conf > self.thr_point else [np.nan, np.nan])
         return points
 
     def draw_pose(self, init_frame, points):
@@ -300,10 +300,12 @@ class DetectorHumanPose(Detector):
             idFrom = self.BODY_PARTS[partFrom]
             idTo = self.BODY_PARTS[partTo]
 
-            if (points[idFrom][0] is not None) and (points[idTo][1] is not None):
-                cv2.line(frame, tuple(points[idFrom]), tuple(points[idTo]), (0, 255, 0), 3)
-                cv2.ellipse(frame, tuple(points[idFrom]), (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
-                cv2.ellipse(frame, tuple(points[idTo]), (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
+            if not (np.isnan(points[idFrom][0]) or np.isnan(points[idTo][1])):
+                points_from = tuple(points[idFrom].astype('int64'))
+                points_to = tuple(points[idTo].astype('int64'))
+                cv2.line(frame, points_from, points_to, (0, 255, 0), 3)
+                cv2.ellipse(frame, points_from, (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
+                cv2.ellipse(frame, points_to, (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
         return frame
 
     def compute(self, frame, pred_flag=False, frame_flag=False):
@@ -316,25 +318,42 @@ class DetectorHumanPose(Detector):
         Returns (dict): detected human pose points and drawn frame selectively.
 
         """
+        height, width, _ = frame.shape
+        canvas_org = np.zeros((height, width, 3), np.uint8)
         bboxes = self.detector_body.get_pos(frame)
         results = {}
         for bbox_num, bbox in enumerate(bboxes[0][0]):
             xmin, ymin, xmax, ymax = self.detector_body.get_box(bbox, frame)
             bbox_frame = self.detector_body.crop_bbox_frame(frame, xmin, ymin, xmax, ymax)
-            points = self.get_points(bbox_frame)
+            if (bbox_frame.shape[0] == 0) or (bbox_frame.shape[1] == 0):
+                continue
+            canvas = canvas_org.copy()
+            canvas[ymin:ymax, xmin:xmax] = bbox_frame
+            points = self.get_points(canvas)
+            points = np.asarray(points)
             if pred_flag:
                 results[bbox_num] = {'points': points, 'bbox': (xmin, ymin, xmax, ymax)}
             if frame_flag:
                 # TODO: draws points to original frame
-                frame = self.draw_paris(frame, points)
+                frame = self.draw_pose(frame, points)
         if frame_flag:
             results['frame'] = frame
         return results
 
     def compute_single(self, frame, pred_flag=False, frame_flag=False):
-        # frame include only one person. Deteced person by DetectBody.
-        results = {}
+        """frame include only one person. Deteced person by DetectBody.
+
+        Args:
+            frame:
+            pred_flag:
+            frame_flag:
+
+        Returns:
+
+        """
         points = self.get_points(frame)
+        points = np.asarray(points)
+        results = {}
         if pred_flag:
             results['points'] = points
         if frame_flag:
