@@ -268,13 +268,10 @@ class DetectorHumanPose(Detector):
         self.exec_net.start_async(request_id=0, inputs={self.input_blob: in_frame})
         if self.exec_net.requests[0].wait(-1) == 0:
             res = self.exec_net.requests[0].outputs
-        # pairwise_relations = res['Mconv7_stage2_L1']
-        heatmaps = res['Mconv7_stage2_L2']
+            # pairwise_relations = res['Mconv7_stage2_L1']
+            heatmaps = res['Mconv7_stage2_L2']
         return heatmaps
 
-    def points_conf(self, frame, conf):
-
-        return (x, y)
 
     def get_points(self, frame):
         """get one person's pose points.
