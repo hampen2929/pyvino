@@ -1,12 +1,8 @@
 import pytest
 from vinopy.model.model import Model
-from vinopy.detector.detector_human import (DetectorFace,
-                                            DetectorBody,
-                                            # DetectorHeadpose,
-                                            DetectorEmotion)
 from PIL import Image
 import numpy as np
-# import pytest
+
 
 TEST_FACE = './data/test/face.jpg'
 TEST_BODY = './data/test/person2.jpg'
@@ -20,17 +16,21 @@ class TestModel(object):
     @pytest.mark.parametrize('task', ['detect_face', 
                                       'detect_body',
                                       'emotion_recognition',
-                                      'estimate_headpose'])
+                                      'estimate_headpose',
+                                      'estimate_humanpose'])
     def test_predict(self, task):
         model = Model(task)
         frame = self.load_image()
-        model.predict(frame)
+        results = model.predict(frame)
+        assert isinstance(results, dict)
     
     @pytest.mark.parametrize('task', ['detect_face', 
                                       'detect_body',
                                       'emotion_recognition',
-                                      'estimate_headpose'])
+                                      'estimate_headpose',
+                                      'estimate_humanpose'])
     def test_compute(self, task):
         model = Model(task)
         frame = self.load_image()
-        model.compute(frame)
+        results = model.compute(frame)
+        assert isinstance(results, np.ndarray)
