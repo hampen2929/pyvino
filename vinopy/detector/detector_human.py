@@ -31,13 +31,9 @@ class DetectorObject(Detector):
     
     def get_pos(self, frame):
         n, c, h, w = self.shapes
-        # scale = 640 / frame.shape[1]
-        # frame = cv2.resize(frame, dsize=None, fx=scale, fy=scale)
-
         self.frame_h, self.frame_w = frame.shape[:2]
 
         in_frame = self._in_frame(frame, n, c, h, w)
-        # res's shape: [1, 1, 200, 7]
         self.exec_net.start_async(request_id=0, inputs={
                                   self.input_blob: in_frame})
 
@@ -60,7 +56,8 @@ class DetectorObject(Detector):
                                      'bbox': (xmin, ymin, xmax, ymax)}
             if frame_flag:
                 cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
-                results[bbox_num] = {'frame': frame}
+        if frame_flag:
+            results = {'frame': frame}
         return results
 
 
@@ -195,7 +192,8 @@ class DetectorHeadpose(DetectorObject):
                 scale = (face_frame.shape[0]**2 + face_frame.shape[1]**2)**0.5 / 2
                 self._draw_axes(frame, center_of_face, yaw,
                                 pitch, roll, scale, self.focal_length)
-                results[face_num] = {'frame': frame}
+        if frame_flag:
+            results['frame'] = frame
         return results
 
 
@@ -209,9 +207,7 @@ class DetectorEmotion(DetectorObject):
     def get_emotion(self, face_frame):
         n, c, h, w = self.shapes
         in_frame = self._in_frame(face_frame, n, c, h, w)
-        self.exec_net.start_async(request_id=0, inputs={
-            self.input_blob: in_frame})
-
+        self.exec_net.start_async(request_id=0, inputs={self.input_blob: in_frame})
         if self.exec_net.requests[0].wait(-1) == 0:
             res = self.exec_net.requests[0].outputs[self.out_blob]
             emotion = self.label[np.argmax(res[0])]
@@ -239,26 +235,109 @@ class DetectorEmotion(DetectorObject):
                     frame = cv2.rectangle(frame,
                                             (xmin, ymin), (xmax, ymax),
                                             (0, 255, 0), 2)
-                results[face_num] = {'frame': frame}
+        if frame_flag:
+            results['frame'] = frame
         return results
 
 
 class DetectorHumanPose(Detector):
+    """
+    https://github.com/opencv/opencv/blob/master/samples/dnn/openpose.py
+    """
     def __init__(self):
         self.task = 'estimate_humanpose'
         super().__init__(self.task)
-        self.detector_body = DetectorDetectBody()
+        self.thr_point = 0.1
+        self.detector_body = DetectorBody()
+        self.BODY_PARTS = {"Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
+                           "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
+                           "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "REye": 14,
+                           "LEye": 15, "REar": 16, "LEar": 17, "Background": 18}
+
+        self.POSE_PAIRS = [["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElbow"],
+                           ["RElbow", "RWrist"], ["LShoulder", "LElbow"], ["LElbow", "LWrist"],
+                           ["Neck", "RHip"], ["RHip", "RKnee"], ["RKnee", "RAnkle"], ["Neck", "LHip"],
+                           ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
+                           ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"]]
     
-    def get_res(self, frame):
+    def _get_heatmaps(self, frame):
+        # frame include only one person
         n, c, h, w = self.shapes
         in_frame = self._in_frame(frame, n, c, h, w)
-        self.exec_net.start_async(request_id=0, inputs={
-            self.input_blob: in_frame})
-
+        self.exec_net.start_async(request_id=0, inputs={self.input_blob: in_frame})
         if self.exec_net.requests[0].wait(-1) == 0:
-            res = self.exec_net.requests[0].outputs[self.out_blob]
-        return res
+            res = self.exec_net.requests[0].outputs
+        # pairwise_relations = res['Mconv7_stage2_L1']
+        heatmaps = res['Mconv7_stage2_L2']
+        return heatmaps
 
-    def get_heatmap(sefl):
-        pass
-    
+    def get_points(self, frame):
+        frame_width = frame.shape[1]
+        frame_height = frame.shape[0]
+        heatmaps = self._get_heatmaps(frame)
+        points = []
+        for num_parts in range(len(self.BODY_PARTS)):
+            # Slice heatmap of corresponging body's part.
+            heatMap = heatmaps[0, num_parts, :, :]
+
+            _, conf, _, point = cv2.minMaxLoc(heatMap)
+            x = (frame_width * point[0]) / heatmaps.shape[3]
+            y = (frame_height * point[1]) / heatmaps.shape[2]
+
+            # Add a point if it's confidence is higher than threshold.
+            # points.append((int(x), int(y)))
+            points.append([int(x), int(y)] if conf > self.thr_point else [None, None])
+        return points
+
+    def draw_pose(self, init_frame, points):
+        frame = init_frame.copy()
+        for pair in self.POSE_PAIRS:
+            partFrom = pair[0]
+            partTo = pair[1]
+            assert (partFrom in self.BODY_PARTS)
+            assert (partTo in self.BODY_PARTS)
+
+            idFrom = self.BODY_PARTS[partFrom]
+            idTo = self.BODY_PARTS[partTo]
+
+            if (points[idFrom][0] is not None) and (points[idTo][1] is not None):
+                cv2.line(frame, tuple(points[idFrom]), tuple(points[idTo]), (0, 255, 0), 3)
+                cv2.ellipse(frame, tuple(points[idFrom]), (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
+                cv2.ellipse(frame, tuple(points[idTo]), (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
+        return frame
+
+    def compute(self, frame, pred_flag=False, frame_flag=False):
+        """ frame include multi person.
+
+        Args:
+            pred_flag: whether return pred results
+            frame_flag: whether return frame
+
+        Returns (dict): detected human pose points and drawn frame selectively.
+
+        """
+        bboxes = self.detector_body.get_pos(frame)
+        results = {}
+        for bbox_num, bbox in enumerate(bboxes[0][0]):
+            xmin, ymin, xmax, ymax = self.detector_body.get_box(bbox, frame)
+            bbox_frame = self.detector_body.crop_bbox_frame(frame, xmin, ymin, xmax, ymax)
+            points = self.get_points(bbox_frame)
+            if pred_flag:
+                results[bbox_num] = {'points': points, 'bbox': (xmin, ymin, xmax, ymax)}
+            if frame_flag:
+                # TODO: draws points to original frame
+                frame = self.draw_paris(frame, points)
+        if frame_flag:
+            results['frame'] = frame
+        return results
+
+    def compute_single(self, frame, pred_flag=False, frame_flag=False):
+        # frame include only one person. Deteced person by DetectBody.
+        results = {}
+        points = self.get_points(frame)
+        if pred_flag:
+            results['points'] = points
+        if frame_flag:
+            frame = self.draw_pose(frame, points)
+            results['frame'] = frame
+        return results
