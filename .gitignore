@@ -1,6 +1,15 @@
+# storage
 storage/
-.ipynb_checkpoints/
-__pycache__
+ __pycache__	
 # intel_models/
+
+# vscode
 .vscode
+__pycache__
+
+# notebook
 /*.ipynb
+.ipynb_checkpoints/
+
+ # pycharm
+.idea 

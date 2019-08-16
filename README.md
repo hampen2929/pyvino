@@ -11,9 +11,18 @@ cp /opt/intel/openvino_2019.2.242/python/python3.6/openvino/inference_engine/ie_
 
 # setup
 
+## macOS
+```
 source /opt/intel/openvino/bin/setupvars.sh
-
-# directory sturucture
+```
+ ## windows
+ ```
+conda activate openvino
+cd C:\Program Files (x86)\IntelSWTools\openvino\bin\
+setupvars.bat
+cd \Users\yuya.mochimaru\Desktop\openvino-python
+```
+ # directory sturucture
 
 ```
 
