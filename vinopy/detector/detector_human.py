@@ -30,17 +30,9 @@ class DetectorObject(Detector):
         self.frame_h, self.frame_w = frame.shape[:2]
     
     def get_pos(self, frame):
-        n, c, h, w = self.shapes
-        self.frame_h, self.frame_w = frame.shape[:2]
-
-        in_frame = self._in_frame(frame, n, c, h, w)
-        self.exec_net.start_async(request_id=0, inputs={
-                                  self.input_blob: in_frame})
-
-        if self.exec_net.requests[0].wait(-1) == 0:
-            res = self.exec_net.requests[0].outputs[self.out_blob]
-            # prob threshold : 0.5
-            bboxes = res[0][:, np.where(res[0][0][:, 2] > 0.5)]
+        result = self.get_result(frame)[self.out_blob]
+        # prob threshold : 0.5
+        bboxes = result[0][:, np.where(result[0][0][:, 2] > 0.5)]
         return bboxes
 
     def compute(self, init_frame, pred_flag=False, frame_flag=False):
@@ -152,25 +144,15 @@ class DetectorHeadpose(DetectorObject):
         return frame
 
     def get_axis(self, face_frame):
-        n, c, h, w = self.shapes
-        in_frame = self._in_frame(face_frame, n, c, h, w)
-        self.exec_net.start_async(request_id=0, inputs={self.input_blob: in_frame})
-        if self.exec_net.requests[0].wait(-1) == 0:
-            yaw = .0  # Axis of rotation: y
-            pitch = .0  # Axis of rotation: x
-            roll = .0  # Axis of rotation: z
-            # Each output contains one float value that represents value in Tait-Bryan angles (yaw, pitсh or roll).
-            yaw = self.exec_net.requests[0].outputs['angle_y_fc'][0][0]
-            pitch = self.exec_net.requests[0].outputs['angle_p_fc'][0][0]
-            roll = self.exec_net.requests[0].outputs['angle_r_fc'][0][0]
+        result = self.get_result(face_frame)
+        # Each output contains one float value that represents value in Tait-Bryan angles (yaw, pitсh or roll).
+        yaw = result['angle_y_fc'][0][0]
+        pitch = result['angle_p_fc'][0][0]
+        roll = result['angle_r_fc'][0][0]
         return yaw, pitch, roll
 
     def get_center_face(self, face_frame, xmin, ymin):
-        n, c, h, w = self.shapes
-        in_frame = self._in_frame(face_frame, n, c, h, w)
-        self.exec_net.start_async(request_id=0, inputs={self.input_blob: in_frame})
-        if self.exec_net.requests[0].wait(-1) == 0:
-            center_of_face = (xmin + face_frame.shape[1] / 2, ymin + face_frame.shape[0] / 2, 0)
+        center_of_face = (xmin + face_frame.shape[1] / 2, ymin + face_frame.shape[0] / 2, 0)
         return center_of_face
 
     def compute(self, init_frame, pred_flag=False, frame_flag=False):
@@ -261,15 +243,9 @@ class DetectorHumanPose(Detector):
                            ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"]]
     
     def _get_heatmaps(self, frame):
-        # frame include only one person
-        n, c, h, w = self.shapes
-        # TODO: image shape ratio should be remained
-        in_frame = self._in_frame(frame, n, c, h, w)
-        self.exec_net.start_async(request_id=0, inputs={self.input_blob: in_frame})
-        if self.exec_net.requests[0].wait(-1) == 0:
-            res = self.exec_net.requests[0].outputs
-            # pairwise_relations = res['Mconv7_stage2_L1']
-            heatmaps = res['Mconv7_stage2_L2']
+        result = self.get_result(frame)
+        # pairwise_relations = result['Mconv7_stage2_L1']
+        heatmaps = result['Mconv7_stage2_L2']
         return heatmaps
 
 
@@ -378,3 +354,13 @@ class DetectorHumanPose(Detector):
             frame = self.draw_pose(frame, points)
             results['frame'] = frame
         return results
+
+
+class DetectorSegment(Detector):
+    def __init__(self):
+        self.task = 'detect_segment'
+        super().__init__(self.task)
+
+    def get_mask(self, frame):
+        result = self.get_result(frame)
+        mask = result
