@@ -2,10 +2,7 @@
 import numpy as np
 import PIL
 
-from ..detector.detector_human import (DetectorFace,
-                                       DetectorBody,
-                                       DetectorHeadpose,
-                                       DetectorEmotion)
+from ..detector.detector_human import *
 
 
 class Model(object):
@@ -34,6 +31,8 @@ class Model(object):
             self.detector = DetectorEmotion()
         elif self.task == 'estimate_headpose':
             self.detector = DetectorHeadpose()
+        elif self.task == 'estimate_humanpose':
+            self.detector = DetectorHumanPose()
         else:
             raise NotImplementedError
     
@@ -54,20 +53,31 @@ class Model(object):
         assert isinstance(frame, np.ndarray)
         return frame
 
-    def predict(self, frame):
-        preds = self.detector.compute(frame, pred_flag=True)
-        assert type(preds) == dict
+    def predict(self, frame, frame_flag=False):
+        """
+
+        Args:
+            frame (np.ndarray): frame which include something to detect
+            frame_flag (bool): whether return frame
+
+        Returns (dict): predicted results
+
+
+        """
+        frame = self._validate_frame(frame)
+        preds = self.detector.compute(frame, pred_flag=True, frame_flag=frame_flag)
+        assert isinstance(preds, dict)
         return preds
 
     def compute(self, frame):
         """predict and draw to frame
         
         Args:
-            frame (np.asarray): frame to compute
+            frame (np.ndarray): frame to compute
         
-        Returns:
-            [np.asarray]: frame with estimated results
+        Returns (np.ndarray): frame which estimated results is drawn
         """
         frame = self._validate_frame(frame)
-        frame = self.detector.compute(frame, frame_flag=True)
+        frame = self.detector.compute(frame, frame_flag=True)['frame']
+        assert isinstance(frame, np.ndarray)
         return frame
