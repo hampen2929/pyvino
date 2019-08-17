@@ -74,7 +74,7 @@ class Segmentor(Detector):
         input_image_info = np.asarray([[input_image_size[0], input_image_size[1], scale]], dtype=np.float32)
         return input_image, input_image_info
 
-    def compute(self, frame, pred_flag=False, frame_flag=False, show_boxes=False, show_scores=False):
+    def compute(self, init_frame, pred_flag=False, frame_flag=False, show_boxes=False, show_scores=False):
         """
 
         Args:
@@ -87,6 +87,7 @@ class Segmentor(Detector):
         Returns (dict): predicted results
 
         """
+        frame = init_frame.copy()
         required_input_keys = {'im_data', 'im_info'}
         assert required_input_keys == set(self.net.inputs.keys()), \
             'Demo supports only topologies with the following input keys: {}'.format(', '.join(required_input_keys))
