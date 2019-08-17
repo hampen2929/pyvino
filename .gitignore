@@ -13,3 +13,7 @@ __pycache__
 
  # pycharm
 .idea 
+
+pyvino.egg-info/
+build
+dist
