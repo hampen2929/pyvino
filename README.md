@@ -42,7 +42,7 @@ setupvars.bat
 
 ```
 
-├── vinopy
+├── pyvino
 |   ├── model
 |   |   └── model.py
 |   ├── detector

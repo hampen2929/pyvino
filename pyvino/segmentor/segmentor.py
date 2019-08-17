@@ -6,9 +6,8 @@ import cv2
 import time
 
 from .visualizer import Visualizer
-from vinopy.util.config import COCO_LABEL
-
-from vinopy.detector.detector import Detector
+from pyvino.util.config import COCO_LABEL
+from pyvino.detector.detector import Detector
 
 
 class Segmentor(Detector):
