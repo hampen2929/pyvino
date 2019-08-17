@@ -357,13 +357,3 @@ class DetectorHumanPose(Detector):
             frame = self.draw_pose(frame, points)
             results['frame'] = frame
         return results
-
-
-class DetectorSegment(Detector):
-    def __init__(self):
-        self.task = 'detect_segment'
-        super().__init__(self.task)
-
-    def get_mask(self, frame):
-        result = self.get_result(frame)
-        mask = result
