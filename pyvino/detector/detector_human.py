@@ -305,7 +305,7 @@ class DetectorHumanPose(Detector):
                 cv2.ellipse(frame, points_to, (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
         return frame
 
-    def compute(self, frame, pred_flag=False, frame_flag=False):
+    def compute(self, init_frame, pred_flag=False, frame_flag=False):
         """ frame include multi person.
 
         Args:
@@ -315,6 +315,7 @@ class DetectorHumanPose(Detector):
         Returns (dict): detected human pose points and drawn frame selectively.
 
         """
+        frame = init_frame.copy()
         height, width, _ = frame.shape
         canvas_org = np.zeros((height, width, 3), np.uint8)
         bboxes = self.detector_body.get_pos(frame)

@@ -8,7 +8,7 @@ intel_models/
 __pycache__
 
 # notebook
-/*.ipynb
+# *.ipynb
 .ipynb_checkpoints/
 
  # pycharm
