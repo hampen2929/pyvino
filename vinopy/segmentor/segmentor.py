@@ -20,12 +20,7 @@ class Segmentor(Detector):
         super().__init__(self.task)
         self.prob_threshold = 0.5
         # 81 classes for segmentation
-        self.class_labels = ['__background__','person','bicycle','car','motorcycle','airplane','bus','train','truck','boat','trafficlight','firehydrant',
-                             'stopsign','parkingmeter','bench','bird','cat','dog','horse','sheep','cow','elephant','bear','zebra','giraffe','backpack','umbrella',
-                             'handbag','tie','suitcase','frisbee','skis','snowboard','sportsball','kite','baseballbat','baseballglove','skateboard','surfboard',
-                             'tennisracket','bottle','wineglass','cup','fork','knife','spoon','bowl','banana','apple','sandwich','orange','broccoli','carrot',
-                             'hotdog','pizza','donut','cake','chair','couch','pottedplant','bed','diningtable','toilet','tv','laptop','mouse','remote','keyboard',
-                             'cellphone','microwave','oven','toaster','sink','refrigerator','book','clock','vase','scissors','teddybear','hairdrier','toothbrush']
+        self.class_labels = COCO_LABEL
 
     def expand_box(self, box, scale):
         w_half = (box[2] - box[0]) * .5
