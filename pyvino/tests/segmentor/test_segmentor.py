@@ -1,6 +1,6 @@
 
-from vinopy.segmentor.segmentor import *
-from vinopy.util.tester import TestDetector
+from pyvino.segmentor.segmentor import *
+from pyvino.util.tester import TestDetector
 import numpy as np
 
 TEST_BODY = './data/test/face.jpg'

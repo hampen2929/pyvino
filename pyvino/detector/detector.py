@@ -2,7 +2,7 @@
 import os
 import cv2
 from openvino.inference_engine import IENetwork, IEPlugin
-from vinopy.util.config import (DEVICE, MODEL_DIR, MODEL_FP,
+from pyvino.util.config import (DEVICE, MODEL_DIR, MODEL_FP,
                                 CPU_EXTENSION, TASKS)
 
 
