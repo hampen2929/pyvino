@@ -1,24 +1,16 @@
 
 from vinopy.detector.detector_human import *
-from PIL import Image
+from vinopy.util.tester import TestDetector
 import numpy as np
 import pandas as pd
-
 
 TEST_FACE = './data/test/face.jpg'
 TEST_BODY = './data/test/person2.jpg'
 
 
-class TestDetector(object):
-    def load_image(self, path_image=TEST_FACE):
-        frame = np.array(Image.open(path_image))
-        # resize image with keeping frame width
-        return frame
-
-
 class TestDetectorFace(TestDetector):
     def test_get_pos(self):
-        frame = self.load_image()
+        frame = self.load_image(TEST_FACE)
         detector = DetectorFace()
         faces = detector.get_pos(frame)
 
@@ -30,7 +22,7 @@ class TestDetectorFace(TestDetector):
         np.testing.assert_almost_equal(faces, faces_exp)
     
     def test_compute_pred(self):
-        frame = self.load_image()
+        frame = self.load_image(TEST_FACE)
         detector = DetectorFace()
         preds = detector.compute(frame, pred_flag=True)
         preds_exp = {0: {'label': 1.0, 'conf': 0.99999917, 'bbox': (1206, 587, 1408, 861)}, 
@@ -55,7 +47,7 @@ class TestDetectorBody(TestDetector):
         np.testing.assert_almost_equal(bboxes, bboxes_exp)
 
     def test_compute_pred(self):
-        frame = self.load_image()
+        frame = self.load_image(TEST_FACE)
         detector = DetectorFace()
         preds = detector.compute(frame, pred_flag=True)
         preds_exp = {0: {'label': 1.0, 'conf': 0.99999917, 'bbox': (1206, 587, 1408, 861)}, 
@@ -71,7 +63,7 @@ class TestDetectorBody(TestDetector):
 
 class TestDetectorHeadpose(TestDetector):
     def test_get_axis(self):
-        frame = self.load_image()
+        frame = self.load_image(TEST_FACE)
 
         detector_face = DetectorFace()
         detector_face.get_frame_shape(frame)
@@ -115,7 +107,7 @@ class TestDetectorHeadpose(TestDetector):
 
 class TestDetectorEmotion(TestDetector):
     def test_get_emotion(self):
-        frame = self.load_image()
+        frame = self.load_image(TEST_FACE)
         detector_face = DetectorFace()
         detector_face.get_frame_shape(frame)
         faces = detector_face.get_pos(frame)
@@ -129,7 +121,7 @@ class TestDetectorEmotion(TestDetector):
             assert emotion == emotion_exp
 
     def test_compute(self):
-        frame = self.load_image()
+        frame = self.load_image(TEST_FACE)
         detector = DetectorEmotion()
         results = detector.compute(frame, pred_flag=True)
         results = pd.DataFrame(results).T['emotion'].values
