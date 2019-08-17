@@ -3,6 +3,7 @@ import numpy as np
 import PIL
 
 from ..detector.detector_human import *
+from ..segmentor.segmentor import *
 
 
 class Model(object):
@@ -23,6 +24,11 @@ class Model(object):
         self._set_detector()
 
     def _set_detector(self):
+        """set detectors according to task
+
+        Returns:
+
+        """
         if self.task == 'detect_face':
             self.detector = DetectorFace()
         elif self.task == 'detect_body':
@@ -33,6 +39,8 @@ class Model(object):
             self.detector = DetectorHeadpose()
         elif self.task == 'estimate_humanpose':
             self.detector = DetectorHumanPose()
+        elif self.task == 'detect_segmentation':
+            self.detector = Segmentor()
         else:
             raise NotImplementedError
     
@@ -54,7 +62,7 @@ class Model(object):
         return frame
 
     def predict(self, frame, frame_flag=False):
-        """
+        """predict on input-frame. return predict results as dict.
 
         Args:
             frame (np.ndarray): frame which include something to detect
