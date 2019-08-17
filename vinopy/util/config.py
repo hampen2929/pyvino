@@ -38,12 +38,27 @@ def load_labels(path_file_name):
     return data
 
 
-CONFIG = load_config()
-DEVICE = CONFIG["MODEL"]["DEVICE"]
-MODEL_DIR = CONFIG["MODEL"]["MODEL_DIR"]
-MODEL_FP = device_type(DEVICE)
-CPU_EXTENSION = CONFIG["MODEL"]["CPU_EXTENSION"]
+DEVICE = "CPU"
+MODEL_FP = 'FP32'
+CPU_EXTENSION = "/opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension.dylib"
+# CPU_EXTENSION = C:\Program Files (x86)\IntelSWTools\openvino\deployment_tools\inference_engine\bin\intel64\Release\cpu_extension_avx2.dll
 
-TASKS = load_task()
+# path to intel models
+MODEL_DIR = "/Users/yuya/src/openvino/intel_models/"
 
-COCO_LABEL = load_labels("./coco_labels.txt")
+MODEL_ZOO = "https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/"
+TASKS = {
+  "detect_face": "face-detection-adas-0001",
+  "emotion_recognition": "emotions-recognition-retail-0003",
+  "estimate_headpose": "head-pose-estimation-adas-0001",
+  "detect_body": "person-detection-retail-0013",
+  "estimate_humanpose": "human-pose-estimation-0001",
+  "detect_segmentation": "instance-segmentation-security-0050"
+}
+
+COCO_LABEL = ['__background__','person','bicycle','car','motorcycle','airplane','bus','train','truck','boat','trafficlight','firehydrant',
+              'stopsign','parkingmeter','bench','bird','cat','dog','horse','sheep','cow','elephant','bear','zebra','giraffe','backpack','umbrella',
+              'handbag','tie','suitcase','frisbee','skis','snowboard','sportsball','kite','baseballbat','baseballglove','skateboard','surfboard',
+              'tennisracket','bottle','wineglass','cup','fork','knife','spoon','bowl','banana','apple','sandwich','orange','broccoli','carrot',
+              'hotdog','pizza','donut','cake','chair','couch','pottedplant','bed','diningtable','toilet','tv','laptop','mouse','remote','keyboard',
+              'cellphone','microwave','oven','toaster','sink','refrigerator','book','clock','vase','scissors','teddybear','hairdrier','toothbrush']
