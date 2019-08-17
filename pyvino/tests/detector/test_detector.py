@@ -1,6 +1,6 @@
 
-from vinopy.detector.detector_human import *
-from vinopy.util.tester import TestDetector
+from pyvino.detector.detector_human import *
+from pyvino.util.tester import TestDetector
 import numpy as np
 import pandas as pd
 
