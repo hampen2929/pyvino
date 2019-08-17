@@ -12,11 +12,20 @@ from vinopy.detector.detector import Detector
 
 
 class Segmentor(Detector):
+    """Detector for segmentation.
+
+    """
     def __init__(self):
         self.task = 'detect_segmentation'
         super().__init__(self.task)
-        self.class_labels = COCO_LABEL
         self.prob_threshold = 0.5
+        # 81 classes for segmentation
+        self.class_labels = ['__background__','person','bicycle','car','motorcycle','airplane','bus','train','truck','boat','trafficlight','firehydrant',
+                             'stopsign','parkingmeter','bench','bird','cat','dog','horse','sheep','cow','elephant','bear','zebra','giraffe','backpack','umbrella',
+                             'handbag','tie','suitcase','frisbee','skis','snowboard','sportsball','kite','baseballbat','baseballglove','skateboard','surfboard',
+                             'tennisracket','bottle','wineglass','cup','fork','knife','spoon','bowl','banana','apple','sandwich','orange','broccoli','carrot',
+                             'hotdog','pizza','donut','cake','chair','couch','pottedplant','bed','diningtable','toilet','tv','laptop','mouse','remote','keyboard',
+                             'cellphone','microwave','oven','toaster','sink','refrigerator','book','clock','vase','scissors','teddybear','hairdrier','toothbrush']
 
     def expand_box(self, box, scale):
         w_half = (box[2] - box[0]) * .5
@@ -49,6 +58,15 @@ class Segmentor(Detector):
         return im_mask
 
     def _input_image(self, frame, scale):
+        """transform frame to proper size for network
+
+        Args:
+            frame (np.ndarray): frame
+            scale: specify how much resize according to frame shape
+
+        Returns (np.ndarray): input image and input image info
+
+        """
         n, c, h, w = self.shapes
         input_image = cv2.resize(frame, None, fx=scale, fy=scale)
         input_image_size = input_image.shape[:2]
@@ -62,11 +80,19 @@ class Segmentor(Detector):
         input_image_info = np.asarray([[input_image_size[0], input_image_size[1], scale]], dtype=np.float32)
         return input_image, input_image_info
 
-    def get_mask(self, frame):
-        result = self.get_result(frame)
-        mask = result
-
     def compute(self, frame, pred_flag=False, frame_flag=False, show_boxes=False, show_scores=False):
+        """
+
+        Args:
+            frame (np.ndarray): input frame
+            pred_flag (bool): whether return pred result
+            frame_flag (bool): whether return frame
+            show_boxes (bool): whether draw boxes
+            show_scores (bool): whether draw scores
+
+        Returns (dict): predicted results
+
+        """
         required_input_keys = {'im_data', 'im_info'}
         assert required_input_keys == set(self.net.inputs.keys()), \
             'Demo supports only topologies with the following input keys: {}'.format(', '.join(required_input_keys))
@@ -121,5 +147,4 @@ class Segmentor(Detector):
             visualizer = Visualizer(self.class_labels, show_boxes=show_boxes, show_scores=show_scores)
             frame = visualizer(frame, boxes, classes, scores, masks)
             results['frame'] = frame
-
         return results
