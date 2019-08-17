@@ -1,5 +1,5 @@
 import pytest
-from vinopy.model.model import Model
+from pyvino.model.model import Model
 from PIL import Image
 import numpy as np
 

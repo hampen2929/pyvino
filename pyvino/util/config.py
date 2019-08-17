@@ -44,7 +44,7 @@ CPU_EXTENSION = "/opt/intel/openvino/inference_engine/lib/intel64/libcpu_extensi
 # CPU_EXTENSION = C:\Program Files (x86)\IntelSWTools\openvino\deployment_tools\inference_engine\bin\intel64\Release\cpu_extension_avx2.dll
 
 # path to intel models
-MODEL_DIR = "/Users/yuya/src/openvino/intel_models/"
+MODEL_DIR = "/Users/yuya/src/pyvino/intel_models/"
 
 MODEL_ZOO = "https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/"
 TASKS = {

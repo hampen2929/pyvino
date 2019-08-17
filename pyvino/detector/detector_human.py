@@ -3,7 +3,7 @@ import numpy as np
 import math
 import cv2
 
-from vinopy.detector.detector import Detector
+from pyvino.detector.detector import Detector
 
 
 class DetectorObject(Detector):
