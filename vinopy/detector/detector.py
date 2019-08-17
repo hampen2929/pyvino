@@ -54,3 +54,11 @@ class Detector(object):
         in_frame = in_frame.transpose((2, 0, 1))
         in_frame = in_frame.reshape((n, c, h, w))
         return in_frame
+
+    def get_result(self, frame):
+        n, c, h, w = self.shapes
+        in_frame = self._in_frame(frame, n, c, h, w)
+        self.exec_net.start_async(request_id=0, inputs={self.input_blob: in_frame})
+        if self.exec_net.requests[0].wait(-1) == 0:
+            result = self.exec_net.requests[0].outputs
+        return result

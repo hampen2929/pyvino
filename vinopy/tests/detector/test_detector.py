@@ -1,8 +1,8 @@
 
-from vinopy.model.model import Model
 from vinopy.detector.detector_human import *
 from PIL import Image
 import numpy as np
+import pandas as pd
 
 
 TEST_FACE = './data/test/face.jpg'
@@ -116,34 +116,36 @@ class TestDetectorHeadpose(TestDetector):
 class TestDetectorEmotion(TestDetector):
     def test_get_emotion(self):
         frame = self.load_image()
-
         detector_face = DetectorFace()
         detector_face.get_frame_shape(frame)
         faces = detector_face.get_pos(frame)
-
         detector_emotion = DetectorEmotion()
-
         emotions_exp = ['happy', 'happy', 'happy', 'happy']
         for face, emotion_exp in zip(faces[0][0], emotions_exp):
             xmin, ymin, xmax, ymax = detector_face.get_box(face, frame)
             face_frame = detector_face.crop_bbox_frame(frame,
                                                   xmin, ymin, xmax, ymax)
             emotion = detector_emotion.get_emotion(face_frame)
-
             assert emotion == emotion_exp
+
+    def test_compute(self):
+        frame = self.load_image()
+        detector = DetectorEmotion()
+        results = detector.compute(frame, pred_flag=True)
+        results = pd.DataFrame(results).T['emotion'].values
+        exps = ['happy', 'happy', 'happy', 'happy']
+        for result, exp in zip(results, exps):
+            assert result == exp
 
 
 class TestDetectorHumanPose(TestDetector):
     def test_compute(self):
         frame = self.load_image(TEST_BODY)
-
         detector = DetectorHumanPose()
         results = detector.compute(frame, pred_flag=True)
-
         exps = np.asarray([[[768., 275.],[768., 325.],[730., 325.],[712., 375.],[730., 400.],[805., 325.],[824., 375.],[805., 400.],[749., 450.],
                             [749., 550.],[749., 625.],[786., 450.],[786., 525.],[768., 625.],[768., 250.],[768., 250.],[749., 275.],[786., 250.],[  0.,   0.]],
                            [[562., 300.],[562., 325.],[524., 325.],[487., 375.],[487., 450.],[618., 325.],[618., 400.],[618., 450.],[524., 450.],
                             [524., 525.],[543., 625.],[580., 450.],[580., 525.],[580., 600.],[562., 275.],[562., 275.],[543., 275.],[580., 275.],[0., 0.]]])
-
         for num, exp in zip(results, exps):
             np.testing.assert_almost_equal(results[num]['points'], exp)
