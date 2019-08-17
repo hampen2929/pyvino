@@ -20,7 +20,7 @@ class TestModel(object):
                                       'estimate_humanpose'])
     def test_predict(self, task):
         model = Model(task)
-        frame = self.load_image()
+        frame = self.load_image(TEST_FACE)
         results = model.predict(frame)
         assert isinstance(results, dict)
     
@@ -31,6 +31,6 @@ class TestModel(object):
                                       'estimate_humanpose'])
     def test_compute(self, task):
         model = Model(task)
-        frame = self.load_image()
+        frame = self.load_image(TEST_FACE)
         results = model.compute(frame)
         assert isinstance(results, np.ndarray)

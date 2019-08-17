@@ -2,7 +2,6 @@
 import configparser
 import json
 
-
 def load_config():
     config = configparser.ConfigParser()
     config.read('./config.ini', 'UTF-8')
@@ -29,6 +28,16 @@ def load_task():
     return tasks
 
 
+def load_txt(path_file_name):
+    with open(path_file_name, 'rt') as file:
+        data = file.read().splitlines()
+    return data
+
+def load_labels(path_file_name):
+    data = load_txt(path_file_name)
+    return data
+
+
 CONFIG = load_config()
 DEVICE = CONFIG["MODEL"]["DEVICE"]
 MODEL_DIR = CONFIG["MODEL"]["MODEL_DIR"]
@@ -36,3 +45,5 @@ MODEL_FP = device_type(DEVICE)
 CPU_EXTENSION = CONFIG["MODEL"]["CPU_EXTENSION"]
 
 TASKS = load_task()
+
+COCO_LABEL = load_labels("./coco_labels.txt")
