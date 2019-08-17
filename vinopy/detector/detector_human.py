@@ -258,6 +258,7 @@ class DetectorHumanPose(Detector):
         Returns (np.ndarray): human jointt points
 
         """
+        assert isinstance(frame, np.ndarray)
         heatmaps = self._get_heatmaps(frame)
         points = np.zeros((len(self.BODY_PARTS), 2))
         for num_parts in range(len(self.BODY_PARTS)):
@@ -273,6 +274,7 @@ class DetectorHumanPose(Detector):
                 x = int((frame_width * point[0]) / heatmaps.shape[3])
                 y = int((frame_height * point[1]) / heatmaps.shape[2])
             points[num_parts] = x, y
+        assert isinstance(points, np.ndarray)
         return points
 
     def draw_pose(self, init_frame, points):
@@ -307,7 +309,7 @@ class DetectorHumanPose(Detector):
         """ frame include multi person.
 
         Args:
-            pred_flag (bool): whether return pred results
+            pred_flag (bool): whether return predicted results
             frame_flag (bool): whether return frame
 
         Returns (dict): detected human pose points and drawn frame selectively.
@@ -324,8 +326,9 @@ class DetectorHumanPose(Detector):
                 continue
             canvas = canvas_org.copy()
             canvas[ymin:ymax, xmin:xmax] = bbox_frame
+            # get points can detect only one person.
+            # exception of detected area should be 0
             points = self.get_points(canvas)
-            # points = np.asarray(points)
             if pred_flag:
                 results[bbox_num] = {'points': points, 'bbox': (xmin, ymin, xmax, ymax)}
             if frame_flag:
