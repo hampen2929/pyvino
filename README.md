@@ -35,7 +35,6 @@ Notebook
 
 ```
 
-
 # reference
 [OpenCV python demos](https://github.com/opencv/open_model_zoo/tree/master/demos/python_demos)
 
