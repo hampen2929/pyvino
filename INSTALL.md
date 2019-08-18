@@ -1,4 +1,5 @@
 # installation
+Now 
 
 ## macOS
 ### OpenVINO
@@ -39,7 +40,7 @@ install pyvino
 python setup.py install
 ```
 
-### edit config
+### config file
 Set cpu extension path.
 ```buildoutcfg
 vi config.ini
@@ -48,14 +49,13 @@ The location of cpu extension is depends on OpenVION version.
 
 In case of 2019 R2, the path is `/opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension.dylib`
 
-### Set config.ini
 The file config.ini and intel_models need to be located at the under home directory. 
 ```buildoutcfg
 mkdir ~/.pyvino
 mv config.ini ~/.pyvino/
 ```
 
-### download intel_models
+### intel_models
 
 We support these tasks and need thr models.
 
@@ -85,10 +85,11 @@ HOME
 ```
 
 Download models from [open model zoo](https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/).
+
 And locate them as above.
+`~/.pyvino/intel_models/`
 
-
-### jupyter
+### jupyter notebook
 if you use jupyter notebook with conda env, please refer below.
 
 if not, please skip.
@@ -121,13 +122,15 @@ jupyter notebook
 ```
 You can chose pyvino env from Kernel -> Change kernel.
 
-
-### Notebook example
-Notebook examples are [HERE](https://github.com/hampen2929/pyvino/blob/master/notebook/).
+### Notebook samples
+Notebook samples are [HERE](https://github.com/hampen2929/pyvino/blob/master/notebook/).
 
 
 ## windows
+### OpenVINO
 [install link](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_windows.html)
+
+### pyvino
 
 Activate environment variables. 
 ```

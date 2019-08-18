@@ -7,7 +7,7 @@ Based on Convolutional Neural Networks (CNNs), the toolkit extends CV workloads 
 
 [Intel OpenVINO](https://software.intel.com/en-us/openvino-toolkit)
 
-# support models
+# supported tasks
 
 We support these tasks.
 
@@ -31,7 +31,7 @@ Computed results by models are as below.
 Click [HERE](https://github.com/hampen2929/pyvino/blob/master/INSTALL.md) for installation instructions.
 
 # Notebook samples
-Notebook examples are [HERE](https://github.com/hampen2929/pyvino/tree/master/notebook).
+Notebook samples are [HERE](https://github.com/hampen2929/pyvino/tree/master/notebook).
 
 # Directory structure
 
