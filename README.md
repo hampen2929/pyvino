@@ -13,7 +13,7 @@ Click [HERE](https://github.com/hampen2929/pyvino/blob/master/INSTALL.md) for in
 
 # Notebook samples
 Notebook examples are [HERE](https://github.com/hampen2929/pyvino/tree/master/notebook).
-okaki
+
 # Directory structure
 
 ```
