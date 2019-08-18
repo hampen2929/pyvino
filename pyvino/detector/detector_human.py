@@ -49,7 +49,7 @@ class DetectorObject(Detector):
             if frame_flag:
                 cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
         if frame_flag:
-            results = {'frame': frame}
+            results['frame'] = frame
         return results
 
 

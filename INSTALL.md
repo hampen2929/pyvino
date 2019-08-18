@@ -58,7 +58,7 @@ jupyter notebook
 ```
 
 ### Notebook example
-Notebook examples is [HERE]()
+Notebook examples are [HERE](https://github.com/hampen2929/pyvino/blob/master/notebook/).
 
 
 ## windows
