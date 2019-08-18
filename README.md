@@ -3,10 +3,14 @@ This is the python implementation of OpenVINO models.
 [Intel OpenVINO](https://software.intel.com/en-us/openvino-toolkit)
 
 # install
+You need to install OpenVINO at the beginning.
 
+Click [HERE](https://github.com/hampen2929/pyvino/blob/master/INSTALL.md) for installation instructions.
+ 
+ 
 
 # Notebook samples
-
+Notebook 
 
  # directory sturucture
 
