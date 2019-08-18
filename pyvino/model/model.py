@@ -1,6 +1,6 @@
 
 import numpy as np
-import PIL
+from PIL.JpegImagePlugin import JpegImageFile
 
 from ..detector.detector_human import *
 from ..segmentor.segmentor import *
@@ -53,7 +53,7 @@ class Model(object):
         Returns:
             [np.ndarray]: frame should be np.ndarray before computed
         """
-        if type(frame) == PIL.JpegImagePlugin.JpegImageFile:
+        if isinstance(frame, JpegImageFile):
             frame = np.asarray(frame)
         elif type(frame) == np.ndarray:
             pass
