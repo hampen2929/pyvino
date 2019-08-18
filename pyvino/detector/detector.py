@@ -6,7 +6,7 @@ from pyvino.util.config import (TASKS, load_config)
 
 
 class Detector(object):
-    def __init__(self, task, path_config='./config.ini', device=None, model_dir=None, model_fp=None):
+    def __init__(self, task, path_config=None, device=None, model_dir=None, model_fp=None):
         self.task = task
         self._load_config(path_config)
         self._set_model_path(model_dir, model_fp)
@@ -18,19 +18,21 @@ class Detector(object):
         self._get_shape()
 
     def _load_config(self, path_config):
-        if not os.path.exists(path_config):
+        if path_config is None:
+            path_config = os.path.join(os.path.expanduser('~'), '.pyvino', 'config.ini')
+
+        elif not os.path.exists(path_config):
             raise FileNotFoundError("Not exists config file. {}".format(path_config))
 
         config = load_config(path_config)
         self.device = config["MODEL"]["DEVICE"]
-        self.model_dir = config["MODEL"]["MODEL_DIR"]
         self.model_fp = config["MODEL"]["MODEL_FP"]
         self.cpu_extension = config["MODEL"]["CPU_EXTENSION"]
 
     def _set_model_path(self, model_dir, model_fp):
         model_name = TASKS[self.task]
         if model_dir is None:
-            model_dir = self.model_dir
+            model_dir = os.path.join(os.path.expanduser('~'), '.pyvino', 'intel_models')
         else:
             assert isinstance(model_dir, str)
 
