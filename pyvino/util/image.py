@@ -1,16 +1,31 @@
 
 import cv2
 import numpy as np
+from PIL import Image
+from copy import deepcopy
 
 def pil2cv(image):
     ''' PIL -> OpenCV '''
     new_image = np.array(image)
-    if new_image.ndim == 2:  # モノクロ
+    if new_image.ndim == 2:
         pass
-    elif new_image.shape[2] == 3:  # カラー
+    elif new_image.shape[2] == 3:
         new_image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-    elif new_image.shape[2] == 4:  # 透過
+    elif new_image.shape[2] == 4:
         new_image = cv2.cvtColor(image, cv2.COLOR_RGBA2BGRA)
+    return new_image
+
+
+def cv2pil(image):
+    ''' OpenCV -> PIL'''
+    new_image = deepcopy(image)
+    if new_image.ndim == 2:
+        pass
+    elif new_image.shape[2] == 3:
+        new_image = new_image[:, :, ::-1]
+    elif new_image.shape[2] == 4:
+        new_image = new_image[:, :, [2, 1, 0, 3]]
+    new_image = Image.fromarray(new_image)
     return new_image
 
 
