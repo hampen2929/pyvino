@@ -1,4 +1,4 @@
-# install 
+# installation
 
 ## macOS
 ### OpenVINO
@@ -20,7 +20,7 @@ cp /opt/intel/openvino/python/python3.6/openvino/inference_engine/ie_api.so /opt
 Create conda env
 ```buildoutcfg
 conda create -n pyvino python==3.6.5
-source activate pyvino 
+source activate pyvino
 ```
 
 Activate environment variables.
@@ -48,16 +48,48 @@ The location of cpu extension is depends on OpenVION version.
 
 In case of 2019 R2, the path is `/opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension.dylib`
 
-### Set config.ini and intel_models
+### Set config.ini
 The file config.ini and intel_models need to be located at the under home directory. 
 ```buildoutcfg
 mkdir ~/.pyvino
-mv config.ini ~/.pyvino
-mv intel_models ~/.pyvino/intel_models
+mv config.ini ~/.pyvino/
 ```
 
+### download intel_models
+
+We support these tasks and need thr models.
+
+|task                    |model                                     |
+|------------------------|------------------------------------|
+|detect_face             |face-detection-adas-0001            |
+|emotion_recognition     |emotions-recognition-retail-0003    |
+|estimate_headpose       |head-pose-estimation-adas-0001      |
+|detect_body             |person-detection-retail-0013        |
+|estimate_humanpose      |human-pose-estimation-0001          |
+|detect_segmentation     |instance-segmentation-security-0050 |
+
+models are located as below.
+```
+HOME
+└── .pyvino
+    └── intel_models
+        ├── face-detection-adas-0001
+        |   └── FP32
+        |       ├── face-detection-adas-0001.xml
+        |       └── face-detection-adas-0001.bin
+       ~~~
+        └── instance-segmentation-security-0050
+            └── FP32
+                ├── instance-segmentation-security-0050.xml
+                └── instance-segmentation-security-0050.bin
+```
+
+Download models from [open model zoo](https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/).
+And locate them as above.
+
+
 ### jupyter
-if you want to use jupyter notebook with conda env, please refer below.
+if you use jupyter notebook with conda env, please refer below.
 
 if not, please skip.
 
@@ -87,6 +119,8 @@ execute jupyter notebook
 ```buildoutcfg
 jupyter notebook
 ```
+You can chose pyvino env from Kernel -> Change kernel.
+
 
 ### Notebook example
 Notebook examples are [HERE](https://github.com/hampen2929/pyvino/blob/master/notebook/).
