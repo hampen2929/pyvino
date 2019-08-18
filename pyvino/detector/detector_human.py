@@ -187,8 +187,8 @@ class DetectorEmotion(DetectorObject):
         self.detector_face = DetectorFace()
 
     def get_emotion(self, face_frame):
-        n, c, h, w = self.shapes
-        in_frame = self._in_frame(face_frame, n, c, h, w)
+        # TODO: paste face_frame to canvas and compute. Like humanpose estiamtion.
+        in_frame = self._in_frame(face_frame)
         self.exec_net.start_async(request_id=0, inputs={self.input_blob: in_frame})
         if self.exec_net.requests[0].wait(-1) == 0:
             res = self.exec_net.requests[0].outputs[self.out_blob]
