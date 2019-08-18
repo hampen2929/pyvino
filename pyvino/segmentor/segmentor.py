@@ -61,7 +61,7 @@ class Segmentor(Detector):
         Returns (np.ndarray): input image and input image info
 
         """
-        n, c, h, w = self.shapes
+        n, c, h, w = self.shape
         input_image = cv2.resize(frame, None, fx=scale, fy=scale)
         input_image_size = input_image.shape[:2]
         input_image = np.pad(input_image, ((0, h - input_image_size[0]),
@@ -95,13 +95,12 @@ class Segmentor(Detector):
         assert required_output_keys.issubset(self.net.outputs.keys()), \
             'Demo supports only topologies with the following output keys: {}'.format(', '.join(required_output_keys))
 
-        n, c, h, w = self.shapes
+        n, c, h, w = self.shape
         assert n == 1, 'Only batch 1 is supported by the demo application'
 
         log.info('Starting inference...')
 
         # Resize the image to leave the same aspect ratio and to fit it to a window of a target size.
-        n, c, h, w = self.shapes
         scale = min(h / frame.shape[0], w / frame.shape[1])
         input_image, input_image_info = self._input_image(frame, scale)
 
