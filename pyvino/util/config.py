@@ -37,16 +37,6 @@ def load_labels(path_file_name):
     data = load_txt(path_file_name)
     return data
 
-
-# Initial setting
-DEVICE = "CPU"
-MODEL_FP = 'FP32'
-CPU_EXTENSION = "/opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension.dylib"
-# CPU_EXTENSION = C:\Program Files (x86)\IntelSWTools\openvino\deployment_tools\inference_engine\bin\intel64\Release\cpu_extension_avx2.dll
-
-# path to intel models
-MODEL_DIR = "/Users/yuya/src/pyvino/intel_models/"
-
 # tasks implemented
 TASKS = {
   "detect_face": "face-detection-adas-0001",
