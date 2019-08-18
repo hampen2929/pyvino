@@ -12,26 +12,25 @@ Based on Convolutional Neural Networks (CNNs), the toolkit extends CV workloads 
 Click [HERE](https://github.com/hampen2929/pyvino/blob/master/INSTALL.md) for installation instructions.
 
 # Notebook samples
-Notebook 
-
+Notebook examples are [HERE](https://github.com/hampen2929/pyvino/tree/master/notebook).
+okaki
 # Directory structure
 
 ```
 
-├── pyvino
-|   ├── model
-|   |   └── model.py
-|   ├── detector
-|   |   ├── detector.py
-|   |   └── detector_human.py
-|   ├── segmentor
-|   |   ├── segmentor.py
-|   |   └── visualizer.py
-|   ├── util
-|   |   ├── config.py
-|   |   └── image.py
-|   └── tests
-└── config.ini
+└── pyvino
+    ├── model
+    |   └── model.py
+    ├── detector
+    |   └── detector.py
+    ├── segmentor
+    |   ├── segmentor.py
+    |   └── visualizer.py
+    ├── util
+    |   ├── config.py
+    |   ├── testor.py
+    |   └── image.py
+    └── tests
 
 ```
 
