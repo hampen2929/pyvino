@@ -1,5 +1,5 @@
 
-from pyvino.detector.detector_human import *
+from pyvino.detector.detector import *
 from pyvino.util.tester import TestDetector
 import numpy as np
 import pandas as pd
@@ -10,7 +10,7 @@ TEST_BODY = './data/test/person2.jpg'
 
 class TestDetector_(TestDetector):
     def test_init(self):
-        detector = Detector(task='detect_face', path_config='config.ini')
+        Detector(task='detect_face', path_config='config.ini')
 
 
 class TestDetectorFace(TestDetector):
