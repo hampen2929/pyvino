@@ -8,6 +8,11 @@ TEST_FACE = './data/test/face.jpg'
 TEST_BODY = './data/test/person2.jpg'
 
 
+class TestDetector_(TestDetector):
+    def test_init(self):
+        detector = Detector(task='detect_face', path_config='config.ini')
+
+
 class TestDetectorFace(TestDetector):
     def test_get_pos(self):
         frame = self.load_image(TEST_FACE)

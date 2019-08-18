@@ -1,44 +1,20 @@
 # Overview
+
 This is the python implementation of OpenVINO models.
+
+The OpenVINO™ toolkit is a comprehensive toolkit for quickly developing applications and solutions that emulate human vision. 
+Based on Convolutional Neural Networks (CNNs), the toolkit extends CV workloads across Intel® hardware, maximizing performance.
 
 [Intel OpenVINO](https://software.intel.com/en-us/openvino-toolkit)
 
-# install OpenVINO
+# Installation
 
-## macOS
-You can download and install from this page.
-
-[install link](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_macos.html)
-
-On 2019 R2, python3.7 doesn't work somehow.
-need to copy ie_api.so from python3.6.
-Below code solved it.
-
-```
-cp /opt/intel/openvino/python/python3.6/openvino/inference_engine/ie_api.so /opt/intel/openvino/python/python3.7/openvino/inference_engine/ie_api.so
-```
-
-## windows
-[install link](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_windows.html)
-
-# setup
-
-## macOS
-Activate environment variables.
-```
-source /opt/intel/openvino/bin/setupvars.sh
-```
-## windows
-Activate environment variables. 
-```
-cd C:\Program Files (x86)\IntelSWTools\openvino\bin\
-setupvars.bat
-```
+Click [HERE](https://github.com/hampen2929/pyvino/blob/master/INSTALL.md) for installation instructions.
 
 # Notebook samples
+Notebook 
 
-
- # directory sturucture
+# Directory structure
 
 ```
 
@@ -52,7 +28,8 @@ setupvars.bat
 |   |   ├── segmentor.py
 |   |   └── visualizer.py
 |   ├── util
-|   |   └── config.py
+|   |   ├── config.py
+|   |   └── image.py
 |   └── tests
 └── config.ini
 
@@ -63,3 +40,5 @@ setupvars.bat
 [OpenCV python demos](https://github.com/opencv/open_model_zoo/tree/master/demos/python_demos)
 
 [OpenCV dnn](https://github.com/opencv/opencv/tree/master/samples/dnn)
+
+[MODEL_ZOO](https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/)
