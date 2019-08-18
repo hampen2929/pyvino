@@ -7,10 +7,10 @@ from pyvino.util.config import (DEVICE, MODEL_DIR, MODEL_FP,
 
 
 class Detector(object):
-    def __init__(self, task, path_config=None):
+    def __init__(self, task, path_config=None, model_dir=None, model_fp=None):
         self.task = task
         self.device = DEVICE
-        self._set_model_path()
+        self._set_model_path(model_dir, model_fp)
         # Read IR
         self.net = IENetwork(model=self.model_xml, weights=self.model_bin)
         # Load Model
@@ -30,9 +30,21 @@ class Detector(object):
             raise NotImplementedError("Only CPU is supported")
         self.exec_net = plugin.load(network=self.net, num_requests=2)
 
-    def _set_model_path(self):
+    def _set_model_path(self, model_dir, model_fp):
         model_name = TASKS[self.task]
-        path_model_dir = os.path.join(MODEL_DIR, model_name, MODEL_FP)
+        if model_dir is None:
+            model_dir = MODEL_DIR
+        else:
+            assert isinstance(model_dir, str)
+
+        if model_fp is None:
+            model_fp = MODEL_FP
+        elif model_fp == 'FP16':
+            pass
+        else:
+            raise NotImplementedError
+
+        path_model_dir = os.path.join(model_dir, model_name, model_fp)
         self.model_xml = os.path.join(
             path_model_dir, model_name + '.xml')
         self.model_bin = os.path.join(
@@ -46,14 +58,13 @@ class Detector(object):
         """get shape for network input
 
         """
-        self.shapes = self.net.inputs[self.input_blob].shape
+        self.shape = self.net.inputs[self.input_blob].shape
 
     def _in_frame(self, frame):
         """
         transform frame for network input shape
         """
-        n, c, h, w = self.shapes
-        # TODO: include n, c, h, w with "n, c, h, w = self.shapes"
+        n, c, h, w = self.shape
         in_frame = cv2.resize(frame, (w, h))
         in_frame = in_frame.transpose((2, 0, 1))
         in_frame = in_frame.reshape((n, c, h, w))
