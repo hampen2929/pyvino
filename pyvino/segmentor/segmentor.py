@@ -78,7 +78,7 @@ class Segmentor(Detector):
         """
 
         Args:
-            frame (np.ndarray): input frame
+            init_frame (np.ndarray): input frame
             pred_flag (bool): whether return pred result
             frame_flag (bool): whether return frame
             show_boxes (bool): whether draw boxes
