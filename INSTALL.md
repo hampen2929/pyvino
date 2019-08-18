@@ -89,7 +89,7 @@ And locate them as above.
 
 
 ### jupyter
-if you want to use jupyter notebook with conda env, please refer below.
+if you use jupyter notebook with conda env, please refer below.
 
 if not, please skip.
 
