@@ -49,7 +49,7 @@ class DetectorObject(Detector):
             if frame_flag:
                 cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
         if frame_flag:
-            results = {'frame': frame}
+            results['frame'] = frame
         return results
 
 
@@ -187,8 +187,8 @@ class DetectorEmotion(DetectorObject):
         self.detector_face = DetectorFace()
 
     def get_emotion(self, face_frame):
-        n, c, h, w = self.shapes
-        in_frame = self._in_frame(face_frame, n, c, h, w)
+        # TODO: paste face_frame to canvas and compute. Like humanpose estiamtion.
+        in_frame = self._in_frame(face_frame)
         self.exec_net.start_async(request_id=0, inputs={self.input_blob: in_frame})
         if self.exec_net.requests[0].wait(-1) == 0:
             res = self.exec_net.requests[0].outputs[self.out_blob]
@@ -305,7 +305,7 @@ class DetectorHumanPose(Detector):
                 cv2.ellipse(frame, points_to, (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
         return frame
 
-    def compute(self, frame, pred_flag=False, frame_flag=False):
+    def compute(self, init_frame, pred_flag=False, frame_flag=False):
         """ frame include multi person.
 
         Args:
@@ -315,6 +315,7 @@ class DetectorHumanPose(Detector):
         Returns (dict): detected human pose points and drawn frame selectively.
 
         """
+        frame = init_frame.copy()
         height, width, _ = frame.shape
         canvas_org = np.zeros((height, width, 3), np.uint8)
         bboxes = self.detector_body.get_pos(frame)

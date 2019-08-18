@@ -1,15 +1,19 @@
 # storage
 storage/
  __pycache__	
-intel_models/
+# intel_models/
 
 # vscode
 .vscode
 __pycache__
 
 # notebook
-/*.ipynb
+# *.ipynb
 .ipynb_checkpoints/
 
  # pycharm
 .idea 
+
+pyvino.egg-info/
+build
+dist

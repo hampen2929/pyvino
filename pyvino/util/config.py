@@ -2,9 +2,9 @@
 import configparser
 import json
 
-def load_config():
+def load_config(path_config):
     config = configparser.ConfigParser()
-    config.read('./config.ini', 'UTF-8')
+    config.read(path_config, 'UTF-8')
     return config
 
 
@@ -37,16 +37,7 @@ def load_labels(path_file_name):
     data = load_txt(path_file_name)
     return data
 
-
-DEVICE = "CPU"
-MODEL_FP = 'FP32'
-CPU_EXTENSION = "/opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension.dylib"
-# CPU_EXTENSION = C:\Program Files (x86)\IntelSWTools\openvino\deployment_tools\inference_engine\bin\intel64\Release\cpu_extension_avx2.dll
-
-# path to intel models
-MODEL_DIR = "/Users/yuya/src/pyvino/intel_models/"
-
-MODEL_ZOO = "https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/"
+# tasks implemented
 TASKS = {
   "detect_face": "face-detection-adas-0001",
   "emotion_recognition": "emotions-recognition-retail-0003",
@@ -56,6 +47,7 @@ TASKS = {
   "detect_segmentation": "instance-segmentation-security-0050"
 }
 
+# Segmentor
 COCO_LABEL = ['__background__','person','bicycle','car','motorcycle','airplane','bus','train','truck','boat','trafficlight','firehydrant',
               'stopsign','parkingmeter','bench','bird','cat','dog','horse','sheep','cow','elephant','bear','zebra','giraffe','backpack','umbrella',
               'handbag','tie','suitcase','frisbee','skis','snowboard','sportsball','kite','baseballbat','baseballglove','skateboard','surfboard',
