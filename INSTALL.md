@@ -84,7 +84,7 @@ HOME
                 └── instance-segmentation-security-0050.bin
 ```
 
-Download mdoels from [open model zoo](https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/).
+Download models from [open model zoo](https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/).
 And locate them as above.
 
 
