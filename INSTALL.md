@@ -1,15 +1,13 @@
 # installation
-Now 
-
 ## macOS
 ### OpenVINO
 
-You can download and install from this page.
+Please refer to [this page]((https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_macos.html)) for installation.
 
-[install link](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_macos.html)
+In my environment, version 2019 R2 of OpenVINO did not work properly.
 
-On 2019 R2, python3.7 doesn't work somehow.
-need to copy ie_api.so from python3.6.
+Need to copy ie_api.so from python3.6.
+
 Below command solved it.
 
 ```
@@ -35,6 +33,8 @@ git clone https://github.com/hampen2929/pyvino.git
 cd pyvino
 ``` 
 
+
+
 install pyvino
 ```buildoutcfg
 python setup.py install
@@ -57,7 +57,7 @@ mv config.ini ~/.pyvino/
 
 ### intel_models
 
-We support these tasks and need thr models.
+We support these tasks.
 
 |task                    |model                                     |
 |------------------------|------------------------------------|
@@ -68,7 +68,7 @@ We support these tasks and need thr models.
 |estimate_humanpose      |human-pose-estimation-0001          |
 |detect_segmentation     |instance-segmentation-security-0050 |
 
-models are located as below.
+Place models as above.
 ```
 HOME
 └── .pyvino
