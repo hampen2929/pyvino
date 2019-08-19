@@ -24,8 +24,6 @@ Computed results by models are as below.
 
 ![supported_models](https://user-images.githubusercontent.com/34574033/63226303-36bc7b80-c213-11e9-8881-74241128e1d3.png)
 
-
-
 # Installation
 
 Click [HERE](https://github.com/hampen2929/pyvino/blob/master/INSTALL.md) for installation instructions.
