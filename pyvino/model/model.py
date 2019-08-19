@@ -7,7 +7,7 @@ from ..segmentor.segmentor import *
 
 
 class Model(object):
-    """ include model for detection
+    """ include all model.
     
     Raises:
         NotImplementedError: No task.

@@ -17,3 +17,4 @@ __pycache__
 pyvino.egg-info/
 build
 dist
+docs
