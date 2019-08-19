@@ -7,7 +7,7 @@ Based on Convolutional Neural Networks (CNNs), the toolkit extends CV workloads 
 
 [Intel OpenVINO](https://software.intel.com/en-us/openvino-toolkit)
 
-# supported tasks
+# Supported tasks
 
 We support these tasks.
 
@@ -51,7 +51,10 @@ Notebook samples are [HERE](https://github.com/hampen2929/pyvino/tree/master/not
 
 ```
 
-# reference
+# License
+This project is released under the [Apache 2.0 license](https://github.com/hampen2929/pyvino/blob/master/LICENSE).
+
+# Reference
 [OpenCV python demos](https://github.com/opencv/open_model_zoo/tree/master/demos/python_demos)
 
 [OpenCV dnn](https://github.com/opencv/opencv/tree/master/samples/dnn)
