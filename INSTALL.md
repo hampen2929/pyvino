@@ -1,4 +1,16 @@
-# installation
+# System requirements
+
+## Processors
+6th to 9th generation Intel® Core™ and Intel® Xeon® processors
+
+## Compatible Operating Systems
+- Ubuntu* 16.04.3 LTS (64 bit)
+- Windows® 10 (64 bit)
+- CentOS* 7.4 (64 bit)
+- macOS* 10.13, 10.14 (64 bit)
+
+# Installation
+
 ## macOS
 ### OpenVINO
 
@@ -33,8 +45,6 @@ git clone https://github.com/hampen2929/pyvino.git
 cd pyvino
 ``` 
 
-
-
 install pyvino
 ```buildoutcfg
 python setup.py install
@@ -52,7 +62,7 @@ In case of 2019 R2, the path is `/opt/intel/openvino/inference_engine/lib/intel6
 The file config.ini and intel_models need to be located at the under home directory. 
 ```buildoutcfg
 mkdir ~/.pyvino
-mv config.ini ~/.pyvino/
+cp config.ini ~/.pyvino/
 ```
 
 ### intel_models
