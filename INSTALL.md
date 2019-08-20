@@ -14,7 +14,7 @@
 ## macOS
 ### OpenVINO
 
-Please refer to [this page]((https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_macos.html)) for installation.
+Please refer [HERE](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_macos.html) for installation.
 
 In my environment, version 2019 R2 of OpenVINO did not work properly.
 
@@ -50,7 +50,7 @@ install pyvino
 python setup.py install
 ```
 
-### config file
+### Set config file
 Set cpu extension path.
 ```buildoutcfg
 vi config.ini
@@ -65,7 +65,7 @@ mkdir ~/.pyvino
 cp config.ini ~/.pyvino/
 ```
 
-### intel_models
+### Download intel models
 
 We support these tasks.
 
@@ -78,7 +78,15 @@ We support these tasks.
 |estimate_humanpose      |human-pose-estimation-0001          |
 |detect_segmentation     |instance-segmentation-security-0050 |
 
-Place models as above.
+
+Download intel_models with this command.
+```buildoutcfg
+python download_intel_models.py
+```
+
+Download models from [open model zoo](https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/)
+and place to `~/.pyvino/intel_models/` as below.
+
 ```
 HOME
 └── .pyvino
@@ -94,12 +102,10 @@ HOME
                 └── instance-segmentation-security-0050.bin
 ```
 
-Download models from [open model zoo](https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/).
+### test command
 
-And locate them as above.
-`~/.pyvino/intel_models/`
 
-### jupyter notebook
+## jupyter notebook
 if you use jupyter notebook with conda env, please refer below.
 
 if not, please skip.
@@ -132,7 +138,7 @@ jupyter notebook
 ```
 You can chose pyvino env from Kernel -> Change kernel.
 
-### Notebook samples
+## Notebook samples
 Notebook samples are [HERE](https://github.com/hampen2929/pyvino/blob/master/notebook/).
 
 

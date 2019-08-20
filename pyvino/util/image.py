@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 from copy import deepcopy
 
+
 def pil2cv(image):
     ''' PIL -> OpenCV '''
     new_image = np.array(image)
@@ -56,3 +57,6 @@ def cam_test(model):
     cv2.destroyAllWindows()
 
 
+def load_image(path_image):
+    frame = np.array(Image.open(path_image))
+    return frame
