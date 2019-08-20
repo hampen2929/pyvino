@@ -35,9 +35,14 @@ source activate pyvino
 ```
 
 Activate environment variables.
+
 ```buildoutcfg
 source /opt/intel/openvino/bin/setupvars.sh
 ```
+
+Before use openvino, this command is needed every time.
+
+Add `source /opt/intel/openvino/bin/setupvars.sh` to `~/.bash_profile` is recommended.
 
 clone repository
 ```buildoutcfg
@@ -103,7 +108,15 @@ HOME
 ```
 
 ### test command
+Test to confirm the installation is success or not.
+```buildoutcfg
+python test_script.py
+```
 
+If success, this image appears.
+![image](https://user-images.githubusercontent.com/34574033/63309083-657c4400-c330-11e9-8b72-754ab8ba9cce.png)
+
+Click "q" to exit.
 
 ## jupyter notebook
 if you use jupyter notebook with conda env, please refer below.
