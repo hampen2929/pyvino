@@ -70,43 +70,6 @@ mkdir ~/.pyvino
 cp config.ini ~/.pyvino/
 ```
 
-### Download intel models
-
-We support these tasks.
-
-|task                    |model                                     |
-|------------------------|------------------------------------|
-|detect_face             |face-detection-adas-0001            |
-|emotion_recognition     |emotions-recognition-retail-0003    |
-|estimate_headpose       |head-pose-estimation-adas-0001      |
-|detect_body             |person-detection-retail-0013        |
-|estimate_humanpose      |human-pose-estimation-0001          |
-|detect_segmentation     |instance-segmentation-security-0050 |
-
-
-Download intel_models with this command.
-```buildoutcfg
-python download_intel_models.py
-```
-
-Download models from [open model zoo](https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/)
-and place to `~/.pyvino/intel_models/` as below.
-
-```
-HOME
-└── .pyvino
-    └── intel_models
-        ├── face-detection-adas-0001
-        |   └── FP32
-        |       ├── face-detection-adas-0001.xml
-        |       └── face-detection-adas-0001.bin
-       ~~~
-        └── instance-segmentation-security-0050
-            └── FP32
-                ├── instance-segmentation-security-0050.xml
-                └── instance-segmentation-security-0050.bin
-```
-
 ### test command
 Test to confirm the installation is success or not.
 ```buildoutcfg
@@ -195,45 +158,18 @@ In case of 2019 R1, the path is `C:\Program Files (x86)\IntelSWTools\openvino\de
 The file config.ini and intel_models need to be located at the under home directory. 
 ```buildoutcfg
 mkdir %HOMEPATH%\.pyvino\
-cp config.ini %HOMEPATH%\.pyvino\
+copy config.ini %HOMEPATH%\.pyvino\
 ```
 
-### Download intel models
-
-We support these tasks.
-
-|task                    |model                                     |
-|------------------------|------------------------------------|
-|detect_face             |face-detection-adas-0001            |
-|emotion_recognition     |emotions-recognition-retail-0003    |
-|estimate_headpose       |head-pose-estimation-adas-0001      |
-|detect_body             |person-detection-retail-0013        |
-|estimate_humanpose      |human-pose-estimation-0001          |
-|detect_segmentation     |instance-segmentation-security-0050 |
-
-
-Download intel_models with this command.
+### test command
+Test to confirm the installation is success or not.
 ```buildoutcfg
-python download_intel_models.py
+python test_script.py
 ```
+If success, this image appears.
 
-Download models from [open model zoo](https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/)
-and place to `~/.pyvino/intel_models/` as below.
+![image](https://user-images.githubusercontent.com/34574033/63309083-657c4400-c330-11e9-8b72-754ab8ba9cce.png)
 
-```
-HOME
-└── .pyvino
-    └── intel_models
-        ├── face-detection-adas-0001
-        |   └── FP32
-        |       ├── face-detection-adas-0001.xml
-        |       └── face-detection-adas-0001.bin
-       ~~~
-        └── instance-segmentation-security-0050
-            └── FP32
-                ├── instance-segmentation-security-0050.xml
-                └── instance-segmentation-security-0050.bin
-```
-
+Click "q" to exit.
 
 TBD

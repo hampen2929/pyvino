@@ -3,8 +3,10 @@ import os
 import numpy as np
 import math
 import cv2
+import urllib.request
 from openvino.inference_engine import IENetwork, IEPlugin
 from pyvino.util.config import (TASKS, load_config)
+from pyvino.util.util import get_logger
 
 
 class Detector(object):
@@ -19,6 +21,7 @@ class Detector(object):
             model_fp (str): FP16 and FP32 are supported.
         """
         self.task = task
+        self.logger = get_logger()
         self._load_config(path_config)
         self._set_model_path(model_dir, model_fp)
         # Read IR
@@ -48,6 +51,43 @@ class Detector(object):
         self.model_fp = config["MODEL"]["MODEL_FP"]
         self.cpu_extension = config["MODEL"]["CPU_EXTENSION"]
 
+    def _download_model(self, model_name, format_type, model_fp='FP32'):
+        """
+
+        Args:
+            model_name (str): model name
+            format_type (str): format_type should be xml or bin
+            model_fp: fp should be FP32 or FP16
+
+        Returns:
+
+        """
+        if not format_type in ["xml", "bin"]:
+            raise ValueError("format_type should be xml or bin")
+        if not model_fp in ["FP32", "FP16"]:
+            raise ValueError("fp should be FP32 or FP16")
+
+        base_url = "https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/{}/{}/{}"
+        path_save_dir = os.path.join(os.path.expanduser('~'), '.pyvino', 'intel_models')
+
+        model_name_format = "{}.{}".format(model_name, format_type)
+        url = base_url.format(model_name, model_fp, model_name_format)
+
+        # save path
+        path_model_fp_dir = os.path.join(path_save_dir, model_name, model_fp)
+
+        # download
+        if not os.path.exists(path_model_fp_dir):
+            os.makedirs(path_model_fp_dir)
+            self.logger.info("make config directory for saving file. Path: {}".format(path_model_fp_dir))
+
+        path_save = os.path.join(path_model_fp_dir, model_name_format)
+        if not os.path.exists(path_save):
+            urllib.request.urlretrieve(url, path_save)
+            self.logger.info("download {} successfully.".format(model_name))
+        else:
+            self.logger.info("model file already exists. Path: {}".format(path_save))
+
     def _set_model_path(self, model_dir, model_fp):
         """
 
@@ -76,6 +116,9 @@ class Detector(object):
             path_model_dir, model_name + '.xml')
         self.model_bin = os.path.join(
             path_model_dir, model_name + ".bin")
+        self._download_model(model_name, 'xml', model_fp)
+        self._download_model(model_name, "bin", model_fp)
+
 
     def _set_ieplugin(self, device):
         """
