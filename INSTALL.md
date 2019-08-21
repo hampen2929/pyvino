@@ -16,21 +16,13 @@
 
 Please refer [HERE](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_macos.html) for installation.
 
-In my environment, version 2019 R2 of OpenVINO did not work properly.
-
-Need to copy ie_api.so from python3.6.
-
-Below command solved it.
-
-```
-cp /opt/intel/openvino/python/python3.6/openvino/inference_engine/ie_api.so /opt/intel/openvino/python/python3.7/openvino/inference_engine/ie_api.so
-```
+pyvino supports only ver 2019 R2.
 
 ### pyvino
 
 Create conda env
 ```buildoutcfg
-conda create -n pyvino python==3.6.5
+conda create -n pyvino python==3.6.5 -y
 ```
 
 Activate environment variables.
