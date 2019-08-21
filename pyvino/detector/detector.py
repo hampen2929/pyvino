@@ -84,9 +84,7 @@ class Detector(object):
         path_save = os.path.join(path_model_fp_dir, model_name_format)
         if not os.path.exists(path_save):
             urllib.request.urlretrieve(url, path_save)
-            self.logger.info("download {} successfully.".format(model_name))
-        else:
-            self.logger.info("model file already exists. Path: {}".format(path_save))
+            self.logger.info("download {} successfully.".format(model_name_format))
 
     def _set_model_path(self, model_dir, model_fp):
         """
