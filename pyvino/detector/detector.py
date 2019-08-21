@@ -51,20 +51,30 @@ class Detector(object):
         self.model_fp = config["MODEL"]["MODEL_FP"]
         self.cpu_extension = config["MODEL"]["CPU_EXTENSION"]
 
-    def _download_model(self, model_name, format_type, fp='FP32'):
-        if not fp in ["FP32", "FP16"]:
-            raise ValueError("fp should be FP32 or FP16")
+    def _download_model(self, model_name, format_type, model_fp='FP32'):
+        """
+
+        Args:
+            model_name (str): model name
+            format_type (str): format_type should be xml or bin
+            model_fp: fp should be FP32 or FP16
+
+        Returns:
+
+        """
         if not format_type in ["xml", "bin"]:
             raise ValueError("format_type should be xml or bin")
+        if not model_fp in ["FP32", "FP16"]:
+            raise ValueError("fp should be FP32 or FP16")
 
         base_url = "https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/{}/{}/{}"
         path_save_dir = os.path.join(os.path.expanduser('~'), '.pyvino', 'intel_models')
 
         model_name_format = "{}.{}".format(model_name, format_type)
-        url = base_url.format(model_name, fp, model_name_format)
+        url = base_url.format(model_name, model_fp, model_name_format)
 
         # save path
-        path_model_fp_dir = os.path.join(path_save_dir, model_name, fp)
+        path_model_fp_dir = os.path.join(path_save_dir, model_name, model_fp)
 
         # download
         if not os.path.exists(path_model_fp_dir):
@@ -106,8 +116,8 @@ class Detector(object):
             path_model_dir, model_name + '.xml')
         self.model_bin = os.path.join(
             path_model_dir, model_name + ".bin")
-        self._download_model(model_name, 'xml')
-        self._download_model(model_name, "bin")
+        self._download_model(model_name, 'xml', model_fp)
+        self._download_model(model_name, "bin", model_fp)
 
 
     def _set_ieplugin(self, device):

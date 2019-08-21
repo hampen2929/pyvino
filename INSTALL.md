@@ -158,7 +158,7 @@ In case of 2019 R1, the path is `C:\Program Files (x86)\IntelSWTools\openvino\de
 The file config.ini and intel_models need to be located at the under home directory. 
 ```buildoutcfg
 mkdir %HOMEPATH%\.pyvino\
-cp config.ini %HOMEPATH%\.pyvino\
+copy config.ini %HOMEPATH%\.pyvino\
 ```
 
 ### test command
