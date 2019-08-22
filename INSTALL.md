@@ -89,7 +89,6 @@ Activate environment variables.
 conda activate pyvino
 cd C:\Program Files (x86)\IntelSWTools\openvino\bin\
 setupvars.bat
-cd C:\Users\yuya.mochimaru\Desktop\pyvino\
 ```
 
 clone repository
