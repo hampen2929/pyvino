@@ -10,7 +10,7 @@ TEST_BODY = './data/test/person2.jpg'
 
 class TestDetector_(TestDetector):
     def test_init(self):
-        Detector(task='detect_face', path_config='config.ini')
+        Detector(task='detect_face')
 
 
 class TestDetectorFace(TestDetector):

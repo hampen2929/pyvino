@@ -60,7 +60,7 @@ class Detector(object):
             self.cpu_extension = self._set_cpu_extension_path(cpu_extension)
         else:
             self.device = self.config["MODEL"]["DEVICE"]
-            self.model_fp = self.config["MODEL"]["MODEL_FP"]
+            self.model_fp = self.config["MODEL"]["MODEL_DIR"]
             self.model_dir = self.config["MODEL"]["MODEL_FP"]
             self.cpu_extension = self.config["MODEL"]["CPU_EXTENSION"]
 
@@ -82,7 +82,8 @@ class Detector(object):
         if model_dir is None:
             model_dir = os.path.join(os.path.expanduser('~'), '.pyvino', 'intel_models')
         if not os.path.exists(model_dir):
-            raise FileNotFoundError(model_dir)
+            os.makedirs(model_dir)
+            self.logger.info("made directory for intel models. {}".format(model_dir))
         return model_dir
 
     def _set_cpu_extension_path(self, cpu_extension):
@@ -96,7 +97,7 @@ class Detector(object):
                 cpu_extension = r"/opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension.dylib"
             elif pf == 'Linux':
                 self.logger.info('on Linux')
-                raise NotImplementedError('will be supported')
+                cpu_extension = r"/opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension_avx2.so"
             else:
                 raise NotImplementedError
         if not os.path.exists(cpu_extension):
@@ -114,7 +115,7 @@ class Detector(object):
         Returns:
 
         """
-        if not format_type in ["xml", "bin"]:
+        if format_type not in ["xml", "bin"]:
             raise ValueError("format_type should be xml or bin")
 
         base_url = "https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/{}/{}/{}"
@@ -156,11 +157,6 @@ class Detector(object):
 
     def _set_ieplugin(self):
         """
-
-        Args:
-            device (str): which device to use
-
-        Returns:
 
         """
         plugin = IEPlugin(device=self.device, plugin_dirs=None)
