@@ -7,10 +7,11 @@ import urllib.request
 from openvino.inference_engine import IENetwork, IEPlugin
 from pyvino.util.config import (TASKS, load_config)
 from pyvino.util.util import get_logger
+import platform
 
 
 class Detector(object):
-    def __init__(self, task, path_config=None, device=None, model_dir=None, model_fp=None):
+    def __init__(self, task, device=None, model_fp=None, model_dir=None, cpu_extension=None, path_config=None):
         """
 
         Args:
@@ -21,13 +22,15 @@ class Detector(object):
             model_fp (str): FP16 and FP32 are supported.
         """
         self.task = task
+        self.model_name = TASKS[self.task]
         self.logger = get_logger()
-        self._load_config(path_config)
-        self._set_model_path(model_dir, model_fp)
+        self.config = self._load_config(path_config)
+        self._set_from_config(device, model_fp, model_dir, cpu_extension)
+        self._set_model_path()
         # Read IR
         self.net = IENetwork(model=self.model_xml, weights=self.model_bin)
         # Load Model
-        self._set_ieplugin(device)
+        self._set_ieplugin()
         self._get_io_blob()
         self._get_shape()
 
@@ -37,21 +40,71 @@ class Detector(object):
         Args:
             path_config (str): path to config file
 
-        Returns:
+        Returns:load_config(path_config)
 
         """
         if path_config is None:
-            path_config = os.path.join(os.path.expanduser('~'), '.pyvino', 'config.ini')
+            # path_config = os.path.join(os.path.expanduser('~'), '.pyvino', 'config.ini')
+            config = None
+        else:
+            if not os.path.exists(path_config):
+                raise FileNotFoundError("Not exists config file. {}".format(path_config))
+            else:
+                config = load_config(path_config)
+        return config
 
-        elif not os.path.exists(path_config):
-            raise FileNotFoundError("Not exists config file. {}".format(path_config))
+    def _set_from_config(self, device, model_fp, model_dir, cpu_extension):
+        if self.config is None:
+            self.device = self._set_device(device)
+            self.model_fp = self._set_model_fp(model_fp)
+            self.model_dir = self._set_model_dir(model_dir)
+            self.cpu_extension = self._set_cpu_extension_path(cpu_extension)
+        else:
+            self.device = self.config["MODEL"]["DEVICE"]
+            self.model_fp = self.config["MODEL"]["MODEL_FP"]
+            self.model_dir = self.config["MODEL"]["MODEL_FP"]
+            self.cpu_extension = self.config["MODEL"]["CPU_EXTENSION"]
 
-        config = load_config(path_config)
-        self.device = config["MODEL"]["DEVICE"]
-        self.model_fp = config["MODEL"]["MODEL_FP"]
-        self.cpu_extension = config["MODEL"]["CPU_EXTENSION"]
+    def _set_device(self, device):
+        if device is None:
+            device = "CPU"
+        if device not in ['CPU', 'GPU']:
+            raise NotImplementedError("Only CPU and GPU is supported")
+        return device
 
-    def _download_model(self, model_name, format_type, model_fp='FP32'):
+    def _set_model_fp(self, model_fp):
+        if model_fp is None:
+            model_fp = "FP32"
+        if model_fp not in ["FP32", "FP16"]:
+            raise NotImplementedError("Only FP32 and FP16 are supported")
+        return model_fp
+
+    def _set_model_dir(self, model_dir):
+        if model_dir is None:
+            model_dir = os.path.join(os.path.expanduser('~'), '.pyvino', 'intel_models')
+        if not os.path.exists(model_dir):
+            raise FileNotFoundError(model_dir)
+        return model_dir
+
+    def _set_cpu_extension_path(self, cpu_extension):
+        if cpu_extension is None:
+            pf = platform.system()
+            if pf == 'Windows':
+                self.logger.info('on Windows')
+                cpu_extension = r"C:\Program Files (x86)\IntelSWTools\openvino\deployment_tools\inference_engine\bin\intel64\Release\cpu_extension_avx2.dll"
+            elif pf == 'Darwin':
+                self.logger.info('on Mac')
+                cpu_extension = r"/opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension.dylib"
+            elif pf == 'Linux':
+                self.logger.info('on Linux')
+                raise NotImplementedError('will be supported')
+            else:
+                raise NotImplementedError
+        if not os.path.exists(cpu_extension):
+            raise FileNotFoundError(cpu_extension)
+        return cpu_extension
+
+    def _download_model(self, format_type):
         """
 
         Args:
@@ -64,17 +117,15 @@ class Detector(object):
         """
         if not format_type in ["xml", "bin"]:
             raise ValueError("format_type should be xml or bin")
-        if not model_fp in ["FP32", "FP16"]:
-            raise ValueError("fp should be FP32 or FP16")
 
         base_url = "https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/{}/{}/{}"
-        path_save_dir = os.path.join(os.path.expanduser('~'), '.pyvino', 'intel_models')
+        path_save_dir = self.model_dir
 
-        model_name_format = "{}.{}".format(model_name, format_type)
-        url = base_url.format(model_name, model_fp, model_name_format)
+        model_name_format = "{}.{}".format(self.model_name, format_type)
+        url = base_url.format(self.model_name, self.model_fp, model_name_format)
 
         # save path
-        path_model_fp_dir = os.path.join(path_save_dir, model_name, model_fp)
+        path_model_fp_dir = os.path.join(path_save_dir, self.model_name, self.model_fp)
 
         # download
         if not os.path.exists(path_model_fp_dir):
@@ -86,7 +137,7 @@ class Detector(object):
             urllib.request.urlretrieve(url, path_save)
             self.logger.info("download {} successfully.".format(model_name_format))
 
-    def _set_model_path(self, model_dir, model_fp):
+    def _set_model_path(self):
         """
 
         Args:
@@ -96,29 +147,15 @@ class Detector(object):
         Returns:
 
         """
-        model_name = TASKS[self.task]
-        if model_dir is None:
-            model_dir = os.path.join(os.path.expanduser('~'), '.pyvino', 'intel_models')
-        else:
-            assert isinstance(model_dir, str)
-
-        if model_fp is None:
-            model_fp = self.model_fp
-        elif model_fp in ["FP32", "FP16"]:
-            pass
-        else:
-            raise NotImplementedError("Only FP32 and FP16 are supported")
-
-        path_model_dir = os.path.join(model_dir, model_name, model_fp)
+        path_model_dir = os.path.join(self.model_dir, self.model_name, self.model_fp)
         self.model_xml = os.path.join(
-            path_model_dir, model_name + '.xml')
+            path_model_dir, self.model_name + '.xml')
         self.model_bin = os.path.join(
-            path_model_dir, model_name + ".bin")
-        self._download_model(model_name, 'xml', model_fp)
-        self._download_model(model_name, "bin", model_fp)
+            path_model_dir, self.model_name + ".bin")
+        self._download_model('xml')
+        self._download_model("bin")
 
-
-    def _set_ieplugin(self, device):
+    def _set_ieplugin(self):
         """
 
         Args:
@@ -127,15 +164,9 @@ class Detector(object):
         Returns:
 
         """
-        if device is None:
-            device = self.device
-        elif device in ['CPU', 'GPU']:
-            pass
-        else:
-            raise NotImplementedError("Only CPU and GPU is supported")
-        plugin = IEPlugin(device=device, plugin_dirs=None)
+        plugin = IEPlugin(device=self.device, plugin_dirs=None)
 
-        if device == "CPU":
+        if self.device == "CPU":
             plugin.add_cpu_extension(self.cpu_extension)
         else:
             raise NotImplementedError("Now, Only CPU is supported")
@@ -144,7 +175,7 @@ class Detector(object):
     def _get_io_blob(self):
         self.input_blob = next(iter(self.net.inputs))
         self.out_blob = next(iter(self.net.outputs))
-    
+
     def _get_shape(self):
         """get shape for network input
 
