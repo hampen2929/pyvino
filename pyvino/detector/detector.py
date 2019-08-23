@@ -239,6 +239,10 @@ class DetectorObject(Detector):
         bboxes = result[0][:, np.where(result[0][0][:, 2] > 0.5)]
         return bboxes
 
+    def get_bbox_size(self, xmin, ymin, xmax, ymax):
+        bbox_size = (xmax - xmin) * (ymax - ymin)
+        return bbox_size
+
     def compute(self, init_frame, pred_flag=False, frame_flag=False):
         # copy frame to prevent from overdraw results
         frame = init_frame.copy()
@@ -246,10 +250,12 @@ class DetectorObject(Detector):
         results = {}
         for bbox_num, bbox in enumerate(bboxes[0][0]):
             xmin, ymin, xmax, ymax = self.get_box(bbox, frame)
+            bbox_size = self.get_bbox_size(xmin, ymin, xmax, ymax)
             if pred_flag:
                 results[bbox_num] = {'label': bbox[1],
                                      'conf': bbox[2],
-                                     'bbox': (xmin, ymin, xmax, ymax)}
+                                     'bbox': (xmin, ymin, xmax, ymax),
+                                     'bbox_size': bbox_size}
             if frame_flag:
                 cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
         if frame_flag:
