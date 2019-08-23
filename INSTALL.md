@@ -36,14 +36,13 @@ MacOS/Linux
 ```buildoutcfg
 source /opt/intel/openvino/bin/setupvars.sh
 ```
+Add `source /opt/intel/openvino/bin/setupvars.sh` to `~/.bashrc` is recommended.
 
 Windows10
 ```buildoutcfg
 cd C:\Program Files (x86)\IntelSWTools\openvino\bin\
 setupvars.bat
 ```
-
-Add `source /opt/intel/openvino/bin/setupvars.sh` to `~/.bash_profile` is recommended.
 
 ### clone repository
 
