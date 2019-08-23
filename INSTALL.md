@@ -6,7 +6,6 @@
 ## Compatible Operating Systems
 - Ubuntu* 16.04.3 LTS (64 bit)
 - Windows® 10 (64 bit)
-- CentOS* 7.4 (64 bit)
 - macOS* 10.13, 10.14 (64 bit)
 
 # Installation
@@ -56,23 +55,6 @@ The location of cpu extension is depends on OpenVION version.
 
 In case of 2019 R2, the path is `/opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension.dylib`
 
-The file config.ini and intel_models need to be located at the under home directory. 
-```buildoutcfg
-mkdir ~/.pyvino
-cp config.ini ~/.pyvino/
-```
-
-### test command
-Test to confirm the installation is success or not.
-```buildoutcfg
-python test_script.py
-```
-If success, this image appears.
-
-![image](https://user-images.githubusercontent.com/34574033/63309083-657c4400-c330-11e9-8b72-754ab8ba9cce.png)
-
-Click "q" to exit.
-
 ## windows
 ### OpenVINO
 [install link](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_windows.html)
@@ -109,13 +91,12 @@ The location of cpu extension is depends on OpenVION version.
 
 In case of 2019 R2, the path is `C:\Program Files (x86)\IntelSWTools\openvino\deployment_tools\inference_engine\bin\intel64\Release\cpu_extension_avx2.dll`
 
-The file config.ini and intel_models need to be located at the under home directory. 
-```buildoutcfg
-mkdir %HOMEPATH%\.pyvino\
-copy config.ini %HOMEPATH%\.pyvino\
-```
 
-### test command
+## Ubuntu
+NotImplemented
+
+
+# test
 Test to confirm the installation is success or not.
 ```buildoutcfg
 python test_script.py
@@ -127,8 +108,8 @@ If success, this image appears.
 Click "q" to exit.
 
 
-
 # Jupyter notebook
+## Set up
 if you use jupyter notebook with conda env, please refer below.
 
 if not, please skip.
