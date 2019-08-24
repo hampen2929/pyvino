@@ -25,7 +25,6 @@ Computed results by models are as below.
 ![supported_models](https://user-images.githubusercontent.com/34574033/63226303-36bc7b80-c213-11e9-8881-74241128e1d3.png)
 
 # Installation
-
 Click [HERE](https://github.com/hampen2929/pyvino/blob/master/INSTALL.md) for installation instructions.
 
 # Notebook samples
@@ -34,27 +33,6 @@ Notebook samples are [HERE](https://github.com/hampen2929/pyvino/tree/master/not
 # Update
 v0.0.1 (2019/08/24)
 - Mac, Windows and Ubuntu are supported/
-
-
-# Directory structure
-
-```
-
-└── pyvino
-    ├── model
-    |   └── model.py
-    ├── detector
-    |   └── detector.py
-    ├── segmentor
-    |   ├── segmentor.py
-    |   └── visualizer.py
-    ├── util
-    |   ├── config.py
-    |   ├── testor.py
-    |   └── image.py
-    └── tests
-
-```
 
 # License
 This project is released under the [Apache 2.0 license](https://github.com/hampen2929/pyvino/blob/master/LICENSE).
