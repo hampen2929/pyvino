@@ -9,6 +9,9 @@ from pyvino.util.util import get_logger
 import platform
 
 
+logger = get_logger(__name__)
+
+
 class Detector(object):
     def __init__(self, task, device=None, model_fp=None, model_dir=None, cpu_extension=None, path_config=None):
         """
@@ -22,7 +25,6 @@ class Detector(object):
         """
         self.task = task
         self.model_name = TASKS[self.task]
-        self.logger = get_logger()
         self.config = self._load_config(path_config)
         self._set_from_config(device, model_fp, model_dir, cpu_extension)
         self._set_model_path()
@@ -83,23 +85,23 @@ class Detector(object):
             model_dir = os.path.join(os.path.expanduser('~'), '.pyvino', 'intel_models')
         if not os.path.exists(model_dir):
             os.makedirs(model_dir)
-            self.logger.info("made directory for intel models. {}".format(model_dir))
+            logger.info("made directory for intel models. {}".format(model_dir))
         return model_dir
 
     def _set_cpu_extension_path(self, cpu_extension):
         if cpu_extension is None:
             pf = platform.system()
+            message = "{} on {}".format(self.model_name, pf)
+            logger.info(message)
             if pf == 'Windows':
-                self.logger.info('on Windows')
                 cpu_extension = r"C:\Program Files (x86)\IntelSWTools\openvino\deployment_tools\inference_engine\bin\intel64\Release\cpu_extension_avx2.dll"
             elif pf == 'Darwin':
-                self.logger.info('on Mac')
                 cpu_extension = r"/opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension.dylib"
             elif pf == 'Linux':
-                self.logger.info('on Linux')
                 cpu_extension = r"/opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension_avx2.so"
             else:
                 raise NotImplementedError
+            logger.info("The path to cpu_extension is {}".format(cpu_extension))
         if not os.path.exists(cpu_extension):
             raise FileNotFoundError(cpu_extension)
         return cpu_extension
@@ -130,12 +132,12 @@ class Detector(object):
         # download
         if not os.path.exists(path_model_fp_dir):
             os.makedirs(path_model_fp_dir)
-            self.logger.info("make config directory for saving file. Path: {}".format(path_model_fp_dir))
+            logger.info("make config directory for saving file. Path: {}".format(path_model_fp_dir))
 
         path_save = os.path.join(path_model_fp_dir, model_name_format)
         if not os.path.exists(path_save):
             urllib.request.urlretrieve(url, path_save)
-            self.logger.info("download {} successfully.".format(model_name_format))
+            logger.info("download {} successfully.".format(model_name_format))
 
     def _set_model_path(self):
         """
