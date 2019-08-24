@@ -18,7 +18,7 @@ source activate pyvino
 
 ## OpenVINO
 ### Download and install
-Download linkf
+Download link
 
 - [MacOS](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_macos.html)
 
