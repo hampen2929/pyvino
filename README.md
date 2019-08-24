@@ -31,6 +31,11 @@ Click [HERE](https://github.com/hampen2929/pyvino/blob/master/INSTALL.md) for in
 # Notebook samples
 Notebook samples are [HERE](https://github.com/hampen2929/pyvino/tree/master/notebook).
 
+# Update
+v0.0.1 (2019/08/24)
+- Mac, Windows and Ubuntu are supported/
+
+
 # Directory structure
 
 ```
