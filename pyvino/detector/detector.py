@@ -532,6 +532,7 @@ class DetectorHumanPose(Detector):
         y = np.where(y > ymax, np.nan, y)
 
         filtered_points = np.asarray([x, y]).T
+        filtered_points[(np.isnan(filtered_points.prod(axis=1)))] = np.nan
 
         return filtered_points
 
