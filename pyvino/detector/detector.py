@@ -453,6 +453,13 @@ class DetectorHumanPose(Detector):
                            ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
                            ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"]]
 
+        self.POSE_PARTS_FLATTEN = ['Nose_x', 'Nose_y', 'Neck_x', 'Neck_y', 'RShoulder_x', 'RShoulder_y',
+                                   'RElbow_x', 'RElbow_y', 'RWrist_x', 'RWrist_y', 'LShoulder_x',
+                                   'LShoulder_y', 'LElbow_x', 'LElbow_y', 'LWrist_x', 'LWrist_y', 'RHip_x',
+                                   'RHip_y', 'RKnee_x', 'RKnee_y', 'RAnkle_x', 'RAnkle_y', 'LHip_x',
+                                   'LHip_y', 'LKnee_x', 'LKnee_y', 'LAnkle_x', 'LAnkle_y', 'REye_x',
+                                   'REye_y', 'LEye_x', 'LEye_y', 'REar_x', 'REar_y', 'LEar_x', 'LEar_y', 'Background_x', 'Background_y']
+
     def _get_heatmaps(self, frame):
         result = self.get_result(frame)
         # pairwise_relations = result['Mconv7_stage2_L1']
