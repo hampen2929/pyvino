@@ -515,10 +515,36 @@ class DetectorHumanPose(Detector):
                 cv2.ellipse(frame, points_to, (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
         return frame
 
-    def compute(self, init_frame, pred_flag=False, frame_flag=False):
+    def _filter_points(self, points, xmin, ymin, xmax, ymax):
+        x = points.T[0]
+        y = points.T[1]
+
+        x = np.where(x < xmin, np.nan, x)
+        x = np.where(x > xmax, np.nan, x)
+        y = np.where(y < ymin, np.nan, y)
+        y = np.where(y > ymax, np.nan, y)
+
+        filtered_points = np.asarray([x, y]).T
+
+        return filtered_points
+
+    def _normalize_points(self, points, xmin, ymin, xmax, ymax):
+        x = points.T[0]
+        y = points.T[1]
+
+        values_x = (x - xmin) / xmax
+        values_y = (y - ymin) / ymax
+
+        norm_points = np.asarray([values_x, values_y]).T
+
+        return norm_points
+
+
+    def compute(self, init_frame, pred_flag=False, frame_flag=False, normalize_flag=False):
         """ frame include multi person.
 
         Args:
+            init_frame (np.ndarray): frame
             pred_flag (bool): whether return predicted results
             frame_flag (bool): whether return frame
 
@@ -540,10 +566,16 @@ class DetectorHumanPose(Detector):
             # get points can detect only one person.
             # exception of detected area should be 0
             points = self.get_points(canvas)
+            filtered_points = self._filter_points(points, xmin, ymin, xmax, ymax)
+
             if pred_flag:
-                results[bbox_num] = {'points': points, 'bbox': (xmin, ymin, xmax, ymax)}
+                results[bbox_num] = {'points': filtered_points, 'bbox': (xmin, ymin, xmax, ymax)}
+                if normalize_flag:
+                    norm_points = self._normalize_points(filtered_points, xmin, ymin, xmax, ymax)
+                    results[bbox_num]['norm_points'] = norm_points
+
             if frame_flag:
-                frame = self.draw_pose(frame, points)
+                frame = self.draw_pose(frame, filtered_points)
         if frame_flag:
             results['frame'] = frame
         return results
