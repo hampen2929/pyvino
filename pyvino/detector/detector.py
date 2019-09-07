@@ -536,6 +536,7 @@ class DetectorHumanPose(Detector):
 
         filtered_points = np.asarray([x, y]).T
         filtered_points[(np.isnan(filtered_points.prod(axis=1)))] = np.nan
+        filtered_points = filtered_points[:len(filtered_points) - 1]
 
         return filtered_points
 
