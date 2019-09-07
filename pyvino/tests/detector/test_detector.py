@@ -1,5 +1,5 @@
 
-from pyvino.detector.detector import *
+from pyvino.detector import *
 from pyvino.util.tester import TestDetector
 import numpy as np
 import pandas as pd
@@ -139,37 +139,21 @@ class TestDetectorHumanPose(TestDetector):
     def test_compute(self):
         frame = self.load_image(TEST_BODY)
         detector = DetectorHumanPose()
-        results = detector.compute(frame, pred_flag=True, normalize_flag=True)
+        results = detector.compute(frame, pred_flag=True)
         exps = np.asarray([[[768., 275.],[768., 325.],[730., 325.],[712., 375.],[730., 400.],[805., 325.],[824., 375.],[805., 400.],[749., 450.],
                             [749., 550.],[749., 625.],[786., 450.],[786., 525.],[768., 625.],[768., 250.],[768., 250.],[749., 275.],[786., 250.]],
                            [[562., 300.],[562., 325.],[524., 325.],[487., 375.],[487., 450.],[618., 325.],[618., 400.],[618., 450.],[524., 450.],
                             [524., 525.],[543., 625.],[580., 450.],[580., 525.],[580., 600.],[562., 275.],[562., 275.],[543., 275.],[580., 275.]]])
-        exps_norm = np.asarray([[[0.07176471, 0.04817518],
-                               [0.07176471, 0.12116788],
-                               [0.02705882, 0.12116788],
-                               [0.00588235, 0.19416058],
-                               [0.02705882, 0.23065694],
-                               [0.11529412, 0.12116788],
-                               [0.13764706, 0.19416058],
-                               [0.11529412, 0.23065694],
-                               [0.04941177, 0.30364963],
-                               [0.04941177, 0.44963503],
-                               [0.04941177, 0.5591241 ],
-                               [0.09294118, 0.30364963],
-                               [0.09294118, 0.4131387 ],
-                               [0.07176471, 0.5591241 ],
-                               [0.07176471, 0.01167883],
-                               [0.07176471, 0.01167883],
-                               [0.04941177, 0.04817518],
-                               [0.09294118, 0.01167883]],
-                              [[0.13782542, 0.07703704], [0.13782542, 0.11407407], [0.07963247, 0.11407407],
-                               [0.0229709 , 0.18814815], [0.0229709 , 0.29925926], [0.22358346, 0.11407407],
-                               [0.22358346, 0.22518519], [0.22358346, 0.29925926], [0.07963247, 0.29925926],
-                               [0.07963247, 0.41037037], [0.10872894, 0.55851852], [0.16539051, 0.29925926],
-                               [0.16539051, 0.41037037], [0.16539051, 0.52148148], [0.13782542, 0.04      ],
-                               [0.13782542, 0.04      ], [0.10872894, 0.04      ], [0.16539051, 0.04      ]]])
+
         for num, exp in zip(results['preds'], exps):
             np.testing.assert_almost_equal(results['preds'][num]['points'], exp)
 
-        for num, exp_norm in zip(results['preds'], exps_norm):
-            np.testing.assert_almost_equal(results['preds'][num]['norm_points'].astype(np.float32), exp_norm.astype(np.float32))
+    def test_normalize_points(self):
+        detector = DetectorHumanPose()
+
+        points = np.asarray([[11, 12], [14, 16]])
+        exps = np.asarray([[0.1, 0.2], [0.4, 0.6]])
+        xmin, ymin, xmax, ymax = 10, 10, 20, 20
+        ress = detector._normalize_points(points, xmin, ymin, xmax, ymax)
+
+        np.testing.assert_almost_equal(ress, exps)

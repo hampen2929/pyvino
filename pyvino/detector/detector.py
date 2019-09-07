@@ -543,8 +543,8 @@ class DetectorHumanPose(Detector):
         x = points.T[0]
         y = points.T[1]
 
-        values_x = (x - xmin) / xmax
-        values_y = (y - ymin) / ymax
+        values_x = (x - xmin) / (xmax - xmin)
+        values_y = (y - ymin) / (ymax - ymin)
 
         norm_points = np.asarray([values_x, values_y]).T
 
