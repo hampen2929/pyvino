@@ -448,7 +448,7 @@ class DetectorHumanPose(Detector):
         self.BODY_PARTS = {"Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
                            "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
                            "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "REye": 14,
-                           "LEye": 15, "REar": 16, "LEar": 17, "Background": 18}
+                           "LEye": 15, "REar": 16, "LEar": 17}
 
         self.POSE_PAIRS = [["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElbow"],
                            ["RElbow", "RWrist"], ["LShoulder", "LElbow"], ["LElbow", "LWrist"],
@@ -461,7 +461,7 @@ class DetectorHumanPose(Detector):
                                    'LShoulder_y', 'LElbow_x', 'LElbow_y', 'LWrist_x', 'LWrist_y', 'RHip_x',
                                    'RHip_y', 'RKnee_x', 'RKnee_y', 'RAnkle_x', 'RAnkle_y', 'LHip_x',
                                    'LHip_y', 'LKnee_x', 'LKnee_y', 'LAnkle_x', 'LAnkle_y', 'REye_x',
-                                   'REye_y', 'LEye_x', 'LEye_y', 'REar_x', 'REar_y', 'LEar_x', 'LEar_y', 'Background_x', 'Background_y']
+                                   'REye_y', 'LEye_x', 'LEye_y', 'REar_x', 'REar_y', 'LEar_x', 'LEar_y']
 
     def _get_heatmaps(self, frame):
         result = self.get_result(frame)
@@ -536,7 +536,6 @@ class DetectorHumanPose(Detector):
 
         filtered_points = np.asarray([x, y]).T
         filtered_points[(np.isnan(filtered_points.prod(axis=1)))] = np.nan
-        filtered_points = filtered_points[:len(filtered_points) - 1]
 
         return filtered_points
 
