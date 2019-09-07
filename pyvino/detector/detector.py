@@ -248,14 +248,15 @@ class DetectorObject(Detector):
         frame = init_frame.copy()
         bboxes = self.get_pos(frame)
         results = {}
+        results['preds'] = {}
         for bbox_num, bbox in enumerate(bboxes[0][0]):
             xmin, ymin, xmax, ymax = self.get_box(bbox, frame)
             bbox_size = self.get_bbox_size(xmin, ymin, xmax, ymax)
             if pred_flag:
-                results[bbox_num] = {'label': bbox[1],
-                                     'conf': bbox[2],
-                                     'bbox': (xmin, ymin, xmax, ymax),
-                                     'bbox_size': bbox_size}
+                results['preds'][bbox_num] = {'label': bbox[1],
+                                              'conf': bbox[2],
+                                              'bbox': (xmin, ymin, xmax, ymax),
+                                              'bbox_size': bbox_size}
             if frame_flag:
                 cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
         if frame_flag:
@@ -369,6 +370,7 @@ class DetectorHeadpose(DetectorObject):
         frame = init_frame.copy()
         faces = self.detector_face.get_pos(frame)
         results = {}
+        results['preds'] = {}
         for face_num, face in enumerate(faces[0][0]):
             xmin, ymin, xmax, ymax = self.get_box(face, frame)
             face_frame = frame[ymin:ymax, xmin:xmax]
@@ -377,7 +379,7 @@ class DetectorHeadpose(DetectorObject):
             if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
                 continue
             if pred_flag:
-                results[face_num] = {'bbox': (xmin, ymin, xmax, ymax),
+                results['preds'][face_num] = {'bbox': (xmin, ymin, xmax, ymax),
                                      'yaw': yaw, 'pitch': pitch, 'roll': roll,
                                      'center_of_face': center_of_face}
             if frame_flag:
@@ -410,6 +412,7 @@ class DetectorEmotion(DetectorObject):
         frame = init_frame.copy()
         faces = self.detector_face.get_pos(frame)
         results = {}
+        results['preds'] = {}
         for face_num, face in enumerate(faces[0][0]):
             xmin, ymin, xmax, ymax = self.get_box(face, frame)
             face_frame = self.crop_bbox_frame(frame, xmin, ymin, xmax, ymax)
@@ -417,8 +420,8 @@ class DetectorEmotion(DetectorObject):
             if (face_frame.shape[0] == 0) or (face_frame.shape[1] == 0):
                 continue
             if pred_flag:
-                results[face_num] = {'bbox': (xmin, ymin, xmax, ymax),
-                                     'emotion': emotion}
+                results['preds'][face_num] = {'bbox': (xmin, ymin, xmax, ymax),
+                                              'emotion': emotion}
             if frame_flag:
                 cv2.putText(frame, emotion,
                             (int(xmin + (xmax - xmin) / 2), int(ymin - 10)),
@@ -564,6 +567,7 @@ class DetectorHumanPose(Detector):
         canvas_org = np.zeros((height, width, 3), np.uint8)
         bboxes = self.detector_body.get_pos(frame)
         results = {}
+        results['preds'] = {}
         for bbox_num, bbox in enumerate(bboxes[0][0]):
             xmin, ymin, xmax, ymax = self.detector_body.get_box(bbox, frame)
             bbox_frame = self.detector_body.crop_bbox_frame(frame, xmin, ymin, xmax, ymax)
@@ -577,10 +581,10 @@ class DetectorHumanPose(Detector):
             filtered_points = self._filter_points(points, xmin, ymin, xmax, ymax)
 
             if pred_flag:
-                results[bbox_num] = {'points': filtered_points, 'bbox': (xmin, ymin, xmax, ymax)}
+                results['preds'][bbox_num] = {'points': filtered_points, 'bbox': (xmin, ymin, xmax, ymax)}
                 if normalize_flag:
                     norm_points = self._normalize_points(filtered_points, xmin, ymin, xmax, ymax)
-                    results[bbox_num]['norm_points'] = norm_points
+                    results['preds'][bbox_num]['norm_points'] = norm_points
 
             if frame_flag:
                 frame = self.draw_pose(frame, filtered_points)

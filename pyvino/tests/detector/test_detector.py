@@ -29,7 +29,7 @@ class TestDetectorFace(TestDetector):
     def test_compute_pred(self):
         frame = self.load_image(TEST_FACE)
         detector = DetectorFace()
-        preds = detector.compute(frame, pred_flag=True)
+        preds = detector.compute(frame, pred_flag=True)['preds']
         preds_exp = {0: {'label': 1.0, 'conf': 0.99999917, 'bbox': (1206, 587, 1408, 861)}, 
                      1: {'label': 1.0, 'conf': 0.99999475, 'bbox': (1011, 234, 1216, 487)}, 
                      2: {'label': 1.0, 'conf': 0.99998975, 'bbox': (519, 158, 716, 461)}, 
@@ -54,7 +54,7 @@ class TestDetectorBody(TestDetector):
     def test_compute_pred(self):
         frame = self.load_image(TEST_FACE)
         detector = DetectorFace()
-        preds = detector.compute(frame, pred_flag=True)
+        preds = detector.compute(frame, pred_flag=True)['preds']
         preds_exp = {0: {'label': 1.0, 'conf': 0.99999917, 'bbox': (1206, 587, 1408, 861)}, 
                      1: {'label': 1.0, 'conf': 0.99999475, 'bbox': (1011, 234, 1216, 487)}, 
                      2: {'label': 1.0, 'conf': 0.99998975, 'bbox': (519, 158, 716, 461)}, 
@@ -129,7 +129,7 @@ class TestDetectorEmotion(TestDetector):
         frame = self.load_image(TEST_FACE)
         detector = DetectorEmotion()
         results = detector.compute(frame, pred_flag=True)
-        results = pd.DataFrame(results).T['emotion'].values
+        results = pd.DataFrame(results['preds']).T['emotion'].values
         exps = ['happy', 'happy', 'happy', 'happy']
         for result, exp in zip(results, exps):
             assert result == exp
@@ -170,8 +170,8 @@ class TestDetectorHumanPose(TestDetector):
                                [0.16539051, 0.41037037], [0.16539051, 0.52148148], [0.13782542, 0.04      ],
                                [0.13782542, 0.04      ], [0.10872894, 0.04      ], [0.16539051, 0.04      ],
                                [    np.nan,     np.nan]]])
-        for num, exp in zip(results, exps):
-            np.testing.assert_almost_equal(results[num]['points'], exp)
+        for num, exp in zip(results['preds'], exps):
+            np.testing.assert_almost_equal(results['preds'][num]['points'], exp)
 
-        for num, exp_norm in zip(results, exps_norm):
-            np.testing.assert_almost_equal(results[num]['norm_points'].astype(np.float32), exp_norm.astype(np.float32))
+        for num, exp_norm in zip(results['preds'], exps_norm):
+            np.testing.assert_almost_equal(results['preds'][num]['norm_points'].astype(np.float32), exp_norm.astype(np.float32))
