@@ -597,7 +597,7 @@ class DetectorHumanPose(Detector):
             if (bbox_frame.shape[0] == 0) or (bbox_frame.shape[1] == 0):
                 continue
             canvas = self.generate_canvas(xmin, ymin, xmax, ymax, height, width)
-            canvas[0:ymax - ymin, 0:xmax - xmin] = bbox_frame
+            canvas[0:bbox_frame.shape[0], 0:bbox_frame.shape[1]] = bbox_frame
             # get points can detect only one person.
             # exception of detected area should be 0
             points = self.get_points(canvas)
