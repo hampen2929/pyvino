@@ -550,6 +550,29 @@ class DetectorHumanPose(Detector):
 
         return norm_points
 
+    def generate_canvas(self, xmin, ymin, xmax, ymax, height, width):
+        ratio_frame = width / height # 16 / 9
+
+        height_bbox = ymax - ymin
+        width_bbox = xmax - xmin
+        ratio_bbox = width_bbox / height_bbox
+
+        if ratio_bbox < ratio_frame:
+            width_canvas = int(height_bbox * ratio_frame)
+            canvas_org = np.zeros((height_bbox, width_canvas, 3), np.uint8)
+        elif ratio_bbox > ratio_frame:
+            height_canvas = int(width_bbox / ratio_frame)
+            canvas_org = np.zeros((height_canvas, width_bbox, 3), np.uint8)
+        elif ratio_bbox == ratio_frame:
+            canvas_org = np.zeros((height_bbox, width_bbox, 3), np.uint8)
+        else:
+            raise ValueError
+        return canvas_org
+
+    def re_position(self, points, xmin, ymin):
+        points.T[0] = points.T[0] + xmin
+        points.T[1] = points.T[1] + ymin
+        return points
 
     def compute(self, init_frame, pred_flag=False, frame_flag=False, normalize_flag=False):
         """ frame include multi person.
@@ -564,7 +587,7 @@ class DetectorHumanPose(Detector):
         """
         frame = init_frame.copy()
         height, width, _ = frame.shape
-        canvas_org = np.zeros((height, width, 3), np.uint8)
+        # canvas_org = np.zeros((height, width, 3), np.uint8)
         bboxes = self.detector_body.get_pos(frame)
         results = {}
         results['preds'] = {}
@@ -573,11 +596,12 @@ class DetectorHumanPose(Detector):
             bbox_frame = self.detector_body.crop_bbox_frame(frame, xmin, ymin, xmax, ymax)
             if (bbox_frame.shape[0] == 0) or (bbox_frame.shape[1] == 0):
                 continue
-            canvas = canvas_org.copy()
-            canvas[ymin:ymax, xmin:xmax] = bbox_frame
+            canvas = self.generate_canvas(xmin, ymin, xmax, ymax, height, width)
+            canvas[0:ymax - ymin, 0:xmax - xmin] = bbox_frame
             # get points can detect only one person.
             # exception of detected area should be 0
             points = self.get_points(canvas)
+            points = self.re_position(points, xmin, ymin)
             filtered_points = self._filter_points(points, xmin, ymin, xmax, ymax)
 
             if pred_flag:

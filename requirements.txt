@@ -1,4 +1,2 @@
-numpy==1.17.0
-pandas==0.25.0
-Pillow==6.1.0
-pytest==5.0.1
+numpy
+pandas
