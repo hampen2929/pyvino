@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pandas as pd
 import math
 import cv2
 import urllib.request
@@ -233,23 +234,32 @@ class DetectorObject(Detector):
     def get_frame_shape(self, frame):
         self.frame_h, self.frame_w = frame.shape[:2]
 
-    def get_pos(self, frame):
+    def get_pos(self, frame, th=0.5, max_bbox_num=False):
         result = self.get_result(frame)[self.out_blob]
         # prob threshold : 0.5
-        bboxes = result[0][:, np.where(result[0][0][:, 2] > 0.5)]
+        bboxes = result[0][:, np.where(result[0][0][:, 2] > th)][0][0]
+        if max_bbox_num:
+            bbox_sizes = np.zeros((len(bboxes)))
+            for bbox_num, bbox in enumerate(bboxes):
+                xmin, ymin, xmax, ymax = self.get_box(bbox, frame)
+                bbox_size = self.get_bbox_size(xmin, ymin, xmax, ymax)
+                bbox_sizes[bbox_num] = bbox_size
+            df = pd.DataFrame(bbox_sizes, columns=['bbox_size'])
+            target_bbox_nums = df.sort_values(ascending=False, by='bbox_size')[0: max_bbox_num]['bbox_size'].index
+            bboxes = bboxes[target_bbox_nums]
         return bboxes
 
     def get_bbox_size(self, xmin, ymin, xmax, ymax):
         bbox_size = (xmax - xmin) * (ymax - ymin)
         return bbox_size
 
-    def compute(self, init_frame, pred_flag=False, frame_flag=False):
+    def compute(self, init_frame, pred_flag=False, frame_flag=False, max_bbox_num=None):
         # copy frame to prevent from overdraw results
         frame = init_frame.copy()
         bboxes = self.get_pos(frame)
         results = {}
         results['preds'] = {}
-        for bbox_num, bbox in enumerate(bboxes[0][0]):
+        for bbox_num, bbox in enumerate(bboxes):
             xmin, ymin, xmax, ymax = self.get_box(bbox, frame)
             bbox_size = self.get_bbox_size(xmin, ymin, xmax, ymax)
             if pred_flag:
@@ -257,6 +267,14 @@ class DetectorObject(Detector):
                                               'conf': bbox[2],
                                               'bbox': (xmin, ymin, xmax, ymax),
                                               'bbox_size': bbox_size}
+                if max_bbox_num:
+                    df = pd.DataFrame(results['preds'])
+                    target_bbox_nums = list(df.loc['bbox_size'].sort_values(ascending=False)[0: max_bbox_num].index)
+                    keys = list(results['preds'].keys())
+                    removed_nums = list(set(target_bbox_nums) ^ set(keys))
+                    for removed_num in removed_nums:
+                        results['preds'].pop(removed_num)
+
             if frame_flag:
                 cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
         if frame_flag:
@@ -371,7 +389,7 @@ class DetectorHeadpose(DetectorObject):
         faces = self.detector_face.get_pos(frame)
         results = {}
         results['preds'] = {}
-        for face_num, face in enumerate(faces[0][0]):
+        for face_num, face in enumerate(faces):
             xmin, ymin, xmax, ymax = self.get_box(face, frame)
             face_frame = frame[ymin:ymax, xmin:xmax]
             yaw, pitch, roll = self.get_axis(face_frame)
@@ -413,7 +431,7 @@ class DetectorEmotion(DetectorObject):
         faces = self.detector_face.get_pos(frame)
         results = {}
         results['preds'] = {}
-        for face_num, face in enumerate(faces[0][0]):
+        for face_num, face in enumerate(faces):
             xmin, ymin, xmax, ymax = self.get_box(face, frame)
             face_frame = self.crop_bbox_frame(frame, xmin, ymin, xmax, ymax)
             emotion = self.get_emotion(face_frame)
@@ -574,7 +592,7 @@ class DetectorHumanPose(Detector):
         points.T[1] = points.T[1] + ymin
         return points
 
-    def compute(self, init_frame, pred_flag=False, frame_flag=False, normalize_flag=False):
+    def compute(self, init_frame, pred_flag=False, frame_flag=False, normalize_flag=False, max_bbox_num=False):
         """ frame include multi person.
 
         Args:
@@ -588,10 +606,10 @@ class DetectorHumanPose(Detector):
         frame = init_frame.copy()
         height, width, _ = frame.shape
         # canvas_org = np.zeros((height, width, 3), np.uint8)
-        bboxes = self.detector_body.get_pos(frame)
+        bboxes = self.detector_body.get_pos(frame, max_bbox_num)
         results = {}
         results['preds'] = {}
-        for bbox_num, bbox in enumerate(bboxes[0][0]):
+        for bbox_num, bbox in enumerate(bboxes):
             xmin, ymin, xmax, ymax = self.detector_body.get_box(bbox, frame)
             bbox_frame = self.detector_body.crop_bbox_frame(frame, xmin, ymin, xmax, ymax)
             if (bbox_frame.shape[0] == 0) or (bbox_frame.shape[1] == 0):

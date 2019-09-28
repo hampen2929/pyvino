@@ -19,10 +19,10 @@ class TestDetectorFace(TestDetector):
         detector = DetectorFace()
         faces = detector.get_pos(frame)
 
-        faces_exp = np.array([[[[0.        , 1.        , 0.99999917, 0.8044468 , 0.50868136, 0.9387975 , 0.74597126],
+        faces_exp = np.array([[0.        , 1.        , 0.99999917, 0.8044468 , 0.50868136, 0.9387975 , 0.74597126],
                                 [0.        , 1.        , 0.99999475, 0.6740358 , 0.20301963, 0.81081235, 0.42199725],
                                 [0.        , 1.        , 0.99998975, 0.34619942, 0.13755499, 0.47750208, 0.3995008 ],
-                                [0.        , 1.        , 0.999305  , 0.06173299, 0.2270025 , 0.22192575, 0.46406496]]]], dtype=np.float32)
+                                [0.        , 1.        , 0.999305  , 0.06173299, 0.2270025 , 0.22192575, 0.46406496]], dtype=np.float32)
         
         np.testing.assert_almost_equal(faces, faces_exp)
     
@@ -46,8 +46,8 @@ class TestDetectorBody(TestDetector):
         detector = DetectorBody()
         bboxes = detector.get_pos(frame)
 
-        bboxes_exp = np.array([[[[0.        , 1.        , 0.9991472 , 0.6621982 , 0.30289605, 0.7962606 , 0.855718  ],
-                                 [0.        , 1.        , 0.9978035 , 0.4420939 , 0.3098352 , 0.6119692 , 0.84347534]]]])
+        bboxes_exp = np.array([[0.        , 1.        , 0.9991472 , 0.6621982 , 0.30289605, 0.7962606 , 0.855718  ],
+                                 [0.        , 1.        , 0.9978035 , 0.4420939 , 0.3098352 , 0.6119692 , 0.84347534]])
                           
         np.testing.assert_almost_equal(bboxes, bboxes_exp)
 
@@ -65,6 +65,14 @@ class TestDetectorBody(TestDetector):
             np.testing.assert_almost_equal(preds[num]['conf'], preds_exp[num]['conf'])
             np.testing.assert_almost_equal(preds[num]['bbox'], preds_exp[num]['bbox'])
 
+    def test_max_bbox_num(self):
+        frame = self.load_image(TEST_BODY)
+        detector = DetectorBody()
+        preds = detector.get_pos(frame, max_bbox_num=1)
+        preds_exp = np.array([[0.        , 1.        , 0.9978035 , 0.4420939 , 0.3098352 ,
+                               0.6119692 , 0.84347534]], dtype=np.float32)
+        np.testing.assert_almost_equal(preds, preds_exp)
+
 
 class TestDetectorHeadpose(TestDetector):
     def test_get_axis(self):
@@ -79,7 +87,7 @@ class TestDetectorHeadpose(TestDetector):
                          (-11.929161,   9.150341, -10.437834), 
                          (-5.246365, 22.493275, -2.398564), 
                          (2.904601, 24.449804, 14.927055)]
-        for face, headpose_exp in zip(faces[0][0], headpose_exps):
+        for face, headpose_exp in zip(faces, headpose_exps):
             xmin, ymin, xmax, ymax = detector_face.get_box(face, frame)
             face_frame = detector_face.crop_bbox_frame(frame,
                                                   xmin, ymin, xmax, ymax)
@@ -101,7 +109,7 @@ class TestDetectorHeadpose(TestDetector):
                 (1113.5, 360.5, 0), 
                 (617.5, 309.5, 0), 
                 (212.0, 398.5, 0)]
-        for face, exp in zip(faces[0][0], exps):
+        for face, exp in zip(faces, exps):
             xmin, ymin, xmax, ymax = detector_face.get_box(face, frame)
             face_frame = detector_face.crop_bbox_frame(frame,
                                                   xmin, ymin, xmax, ymax)
@@ -118,7 +126,7 @@ class TestDetectorEmotion(TestDetector):
         faces = detector_face.get_pos(frame)
         detector_emotion = DetectorEmotion()
         emotions_exp = ['happy', 'happy', 'happy', 'happy']
-        for face, emotion_exp in zip(faces[0][0], emotions_exp):
+        for face, emotion_exp in zip(faces, emotions_exp):
             xmin, ymin, xmax, ymax = detector_face.get_box(face, frame)
             face_frame = detector_face.crop_bbox_frame(frame,
                                                   xmin, ymin, xmax, ymax)
