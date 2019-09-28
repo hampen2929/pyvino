@@ -234,7 +234,7 @@ class DetectorObject(Detector):
     def get_frame_shape(self, frame):
         self.frame_h, self.frame_w = frame.shape[:2]
 
-    def get_pos(self, frame, th=0.5, max_bbox_num=False):
+    def get_pos(self, frame, max_bbox_num=False, th=0.5):
         result = self.get_result(frame)[self.out_blob]
         # prob threshold : 0.5
         bboxes = result[0][:, np.where(result[0][0][:, 2] > th)][0][0]
