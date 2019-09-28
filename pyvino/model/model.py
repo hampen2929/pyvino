@@ -3,7 +3,6 @@ import numpy as np
 from PIL.JpegImagePlugin import JpegImageFile
 
 from ..detector.detector import *
-from ..segmentor.segmentor import *
 
 
 class Model(object):
