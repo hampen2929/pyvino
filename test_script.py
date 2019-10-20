@@ -1,6 +1,7 @@
 import sys
-from pyvino.model.model import Model
-from pyvino.util.image import imshow, cv2pil
+from pyvino.model import Model
+from pyvino.detector import DetectorFace
+from pyvino.util import imshow, cv2pil
 import cv2
 import numpy as np
 from argparse import ArgumentParser
@@ -20,10 +21,11 @@ def main():
     test_image = './data/test/person1.jpg'
     frame = cv2.imread(test_image)
     model = Model(args.task)
-    new_frame = model.compute(frame)
+    # model = DetectorFace(model_fp='FP16')
+    new_frame = model.compute(frame, frame_flag=True)
+    new_frame = new_frame['frame']
     new_frame = np.asarray(cv2pil(new_frame))
     imshow(new_frame)
-
 
 if __name__ == '__main__':
     sys.exit(main() or 0)
