@@ -18,7 +18,9 @@ logger = get_logger(__name__)
 
 
 class Detector(object):
-    def __init__(self, task, device=None, model_fp=None, model_dir=None, cpu_extension=None, path_config=None):
+    def __init__(self, task, device=None,
+                 model_fp=None, model_dir=None,
+                 cpu_extension=None, path_config=None):
         """
 
         Args:
@@ -94,7 +96,7 @@ class Detector(object):
         return model_dir
 
     def _set_cpu_extension_path(self, cpu_extension):
-        if cpu_extension is None:
+        if (self.device == 'CPU') and (cpu_extension is None):
             pf = platform.system()
             message = "{} on {}".format(self.model_name, pf)
             logger.info(message)
@@ -106,9 +108,10 @@ class Detector(object):
                 cpu_extension = r"/opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension_avx2.so"
             else:
                 raise NotImplementedError
-            logger.info("The path to cpu_extension is {}".format(cpu_extension))
-        if not os.path.exists(cpu_extension):
-            raise FileNotFoundError(cpu_extension)
+            logger.info("The path to cpu_extension is {}".format(cpu_extension))        
+            
+            if not os.path.exists(cpu_extension):
+                raise FileNotFoundError(cpu_extension)
         return cpu_extension
 
     def _download_model(self, format_type):
@@ -216,9 +219,13 @@ class Detector(object):
 
 
 class DetectorObject(Detector):
-    def __init__(self, task):
+    def __init__(self, task, device=None,
+                 model_fp=None, model_dir=None,
+                 cpu_extension=None, path_config=None):
         self.task = task
-        super().__init__(self.task)
+        super().__init__(task, device,
+                         model_fp, model_dir,
+                         cpu_extension, path_config)
 
     def get_box(self, bbox, frame):
         frame_h, frame_w = frame.shape[:2]
@@ -276,7 +283,8 @@ class DetectorObject(Detector):
         ymax = int(ymax * (1 + bbox_margin))
         return xmin, ymin, xmax, ymax
 
-    def compute(self, init_frame, pred_flag=False, frame_flag=False, max_bbox_num=None, bbox_margin=False):
+    def compute(self, init_frame, pred_flag=False, frame_flag=False, 
+                max_bbox_num=None, bbox_margin=False):
         # copy frame to prevent from overdraw results
         frame = init_frame.copy()
         bboxes = self.get_pos(frame)
@@ -308,9 +316,13 @@ class DetectorObject(Detector):
 
 
 class DetectorFace(DetectorObject):
-    def __init__(self):
+    def __init__(self, device=None,
+                 model_fp=None, model_dir=None,
+                 cpu_extension=None, path_config=None):
         self.task = 'detect_face'
-        super().__init__(self.task)
+        super().__init__(self.task, device,
+                         model_fp, model_dir,
+                         cpu_extension, path_config)
 
 
 class DetectorBody(DetectorObject):
@@ -800,7 +812,7 @@ class Segmentor(Detector):
             boxes = boxes[larger_nums]
             scores = scores[detections_filter][larger_nums]
             classes = classes[detections_filter][larger_nums]
-            labels = np.asarray([self.class_labels[class_] for class_ in classes])[larger_nums]
+            labels = np.asarray([self.class_labels[class_] for class_ in classes])
             masks = np.asarray(list(segm for segm, is_valid in zip(masks, detections_filter) if is_valid))[larger_nums]
         else:
             scores = scores[detections_filter]
