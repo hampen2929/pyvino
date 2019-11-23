@@ -2,7 +2,12 @@
 import numpy as np
 from PIL.JpegImagePlugin import JpegImageFile
 
-from ..detector.detector import *
+from pyvino.model import (FaceDetector, 
+                          BodyDetector,
+                          HumanPoseDetector,
+                          HeadPoseDetector,
+                          EmotionRecognizer,
+                          InstanceSegmentor)
 
 
 class Model(object):
@@ -29,17 +34,17 @@ class Model(object):
 
         """
         if self.task == 'detect_face':
-            self.detector = DetectorFace()
+            self.detector = FaceDetector()
         elif self.task == 'detect_body':
-            self.detector = DetectorBody()
+            self.detector = BodyDetector()
         elif self.task == 'emotion_recognition':
-            self.detector = DetectorEmotion()
+            self.detector = EmotionRecognizer()
         elif self.task == 'estimate_headpose':
-            self.detector = DetectorHeadpose()
+            self.detector = HeadPoseDetector()
         elif self.task == 'estimate_humanpose':
-            self.detector = DetectorHumanPose()
+            self.detector = HumanPoseDetector()
         elif self.task == 'detect_segmentation':
-            self.detector = Segmentor()
+            self.detector = InstanceSegmentor()
         else:
             raise NotImplementedError
     

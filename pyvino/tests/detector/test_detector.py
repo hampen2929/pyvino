@@ -1,5 +1,12 @@
+from pyvino.model import Detector
+from pyvino.model import (FaceDetector, 
+                          BodyDetector,
+                          HumanPoseDetector,
+                          HeadPoseDetector,
+                          EmotionRecognizer,
+                          InstanceSegmentor)
 
-from pyvino.detector import *
+
 from pyvino.util.tester import TestDetector
 import numpy as np
 import pandas as pd
@@ -16,7 +23,7 @@ class TestDetector_(TestDetector):
 class TestDetectorFace(TestDetector):
     def test_get_pos(self):
         frame = self.load_image(TEST_FACE)
-        detector = DetectorFace()
+        detector = FaceDetector()
         faces = detector.get_pos(frame)
 
         faces_exp = np.array([[0.        , 1.        , 0.99999917, 0.8044468 , 0.50868136, 0.9387975 , 0.74597126],
@@ -28,7 +35,7 @@ class TestDetectorFace(TestDetector):
     
     def test_compute_pred(self):
         frame = self.load_image(TEST_FACE)
-        detector = DetectorFace()
+        detector = FaceDetector()
         preds = detector.compute(frame, pred_flag=True)['preds']
         preds_exp = {0: {'label': 1.0, 'conf': 0.99999917, 'bbox': (1206, 587, 1408, 861)}, 
                      1: {'label': 1.0, 'conf': 0.99999475, 'bbox': (1011, 234, 1216, 487)}, 
@@ -43,7 +50,7 @@ class TestDetectorFace(TestDetector):
 class TestDetectorBody(TestDetector):
     def test_get_pos(self):
         frame = self.load_image(TEST_BODY)
-        detector = DetectorBody()
+        detector = BodyDetector()
         bboxes = detector.get_pos(frame)
 
         bboxes_exp = np.array([[0.        , 1.        , 0.9991472 , 0.6621982 , 0.30289605, 0.7962606 , 0.855718  ],
@@ -53,7 +60,7 @@ class TestDetectorBody(TestDetector):
 
     def test_compute_pred(self):
         frame = self.load_image(TEST_FACE)
-        detector = DetectorFace()
+        detector = FaceDetector()
         preds = detector.compute(frame, pred_flag=True)['preds']
         preds_exp = {0: {'label': 1.0, 'conf': 0.99999917, 'bbox': (1206, 587, 1408, 861)}, 
                      1: {'label': 1.0, 'conf': 0.99999475, 'bbox': (1011, 234, 1216, 487)}, 
@@ -67,7 +74,7 @@ class TestDetectorBody(TestDetector):
 
     def test_max_bbox_num(self):
         frame = self.load_image(TEST_BODY)
-        detector = DetectorBody()
+        detector = BodyDetector()
         preds = detector.get_pos(frame, max_bbox_num=1)
         preds_exp = np.array([[0.        , 1.        , 0.9978035 , 0.4420939 , 0.3098352 ,
                                0.6119692 , 0.84347534]], dtype=np.float32)
@@ -78,11 +85,11 @@ class TestDetectorHeadpose(TestDetector):
     def test_get_axis(self):
         frame = self.load_image(TEST_FACE)
 
-        detector_face = DetectorFace()
+        detector_face = FaceDetector()
         detector_face.get_frame_shape(frame)
         faces = detector_face.get_pos(frame)
 
-        detector_headpose = DetectorHeadpose()
+        detector_headpose = HeadPoseDetector()
         headpose_exps = [(-5.459803 , 17.332203 , -2.9661326), 
                          (-11.929161,   9.150341, -10.437834), 
                          (-5.246365, 22.493275, -2.398564), 
@@ -100,11 +107,11 @@ class TestDetectorHeadpose(TestDetector):
     def test_get_center_face(self):
         frame = self.load_image(TEST_FACE)
 
-        detector_face = DetectorFace()
+        detector_face = FaceDetector()
         detector_face.get_frame_shape(frame)
         faces = detector_face.get_pos(frame)
 
-        detector_headpose = DetectorHeadpose()
+        detector_headpose = HeadPoseDetector()
         exps = [(1307.0, 724.0, 0), 
                 (1113.5, 360.5, 0), 
                 (617.5, 309.5, 0), 
@@ -121,10 +128,10 @@ class TestDetectorHeadpose(TestDetector):
 class TestDetectorEmotion(TestDetector):
     def test_get_emotion(self):
         frame = self.load_image(TEST_FACE)
-        detector_face = DetectorFace()
+        detector_face = FaceDetector()
         detector_face.get_frame_shape(frame)
         faces = detector_face.get_pos(frame)
-        detector_emotion = DetectorEmotion()
+        detector_emotion = EmotionRecognizer()
         emotions_exp = ['happy', 'happy', 'happy', 'happy']
         for face, emotion_exp in zip(faces, emotions_exp):
             xmin, ymin, xmax, ymax = detector_face.get_box(face, frame)
@@ -135,7 +142,7 @@ class TestDetectorEmotion(TestDetector):
 
     def test_compute(self):
         frame = self.load_image(TEST_FACE)
-        detector = DetectorEmotion()
+        detector = EmotionRecognizer()
         results = detector.compute(frame, pred_flag=True)
         results = pd.DataFrame(results['preds']).T['emotion'].values
         exps = ['happy', 'happy', 'happy', 'happy']
@@ -146,7 +153,7 @@ class TestDetectorEmotion(TestDetector):
 class TestDetectorHumanPose(TestDetector):
     def test_compute(self):
         frame = self.load_image(TEST_BODY)
-        detector = DetectorHumanPose()
+        detector = HumanPoseDetector()
         results = detector.compute(frame, pred_flag=True)
 
         exps = np.asarray([[[769., 269.], [769., 325.], [727., 325.], [707., 380.], [738., 408.], [820., 325.],
@@ -160,7 +167,7 @@ class TestDetectorHumanPose(TestDetector):
             np.testing.assert_almost_equal(results['preds'][num]['points'], exp)
 
     def test_normalize_points(self):
-        detector = DetectorHumanPose()
+        detector = HumanPoseDetector()
 
         points = np.asarray([[11, 12], [14, 16]])
         exps = np.asarray([[0.1, 0.2], [0.4, 0.6]])
@@ -173,7 +180,7 @@ class TestDetectorHumanPose(TestDetector):
 class TestSegmentor(TestDetector):
     def test_compute(self):
         frame = self.load_image(TEST_FACE)
-        detector = Segmentor()
+        detector = InstanceSegmentor()
         results = detector.compute(frame, pred_flag=True)
         exps = {'scores': np.array([0.9995578 , 0.99924695, 0.9989293 , 0.9912441 ], dtype=np.float32), 'classes': np.array([1, 1, 1, 1], dtype=np.uint32),
                 'labels': ['person', 'person', 'person', 'person'],
