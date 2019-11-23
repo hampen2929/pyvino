@@ -5,6 +5,7 @@ import math
 import cv2
 import urllib.request
 import time
+from copy import copy
 
 from openvino.inference_engine import IENetwork, IEPlugin
 from pyvino.util.config import (TASKS, load_config)
@@ -552,6 +553,19 @@ class DetectorHumanPose(Detector):
             points[num_parts] = x, y
         assert isinstance(points, np.ndarray)
         return points
+    
+    def mask_compute(self, bbox_frame):
+        results_mask = self.segmentor.compute(bbox_frame, pred_flag=True, max_mask_num=1)
+        if len(results_mask['masks']) > 0:
+            mask = results_mask['masks'][0]
+            mask_canvas = np.zeros((3, mask.shape[0], mask.shape[1]))
+            for num in range(len(mask_canvas)):
+                mask_canvas[num] = mask
+            mask_canvas = mask_canvas.transpose(1, 2, 0)
+            bbox_frame = (bbox_frame * mask_canvas).astype(int)
+        else:
+            logger.info('no mask')
+        return bbox_frame
 
     def draw_pose(self, init_frame, points):
         """draw pose points and line to frame
@@ -606,9 +620,7 @@ class DetectorHumanPose(Detector):
 
         return norm_points
 
-    def generate_canvas(self, xmin, ymin, xmax, ymax, height, width):
-        ratio_frame = width / height # 16 / 9
-
+    def generate_canvas(self, xmin, ymin, xmax, ymax, ratio_frame=16/9):
         height_bbox = ymax - ymin
         width_bbox = xmax - xmin
         ratio_bbox = width_bbox / height_bbox
@@ -629,9 +641,19 @@ class DetectorHumanPose(Detector):
         points.T[0] = points.T[0] + xmin
         points.T[1] = points.T[1] + ymin
         return points
+    
+    def extract_human_pose_points(self, xmin, ymin, xmax, ymax, bbox_frame):
+        canvas = self.generate_canvas(xmin, ymin, xmax, ymax)
+        canvas[0:bbox_frame.shape[0], 0:bbox_frame.shape[1]] = bbox_frame
+        
+        points = self.get_points(canvas)
+        points = self.re_position(points, xmin, ymin)
+        filtered_points = self._filter_points(points, xmin, ymin, xmax, ymax)
+        return filtered_points
 
     def compute(self, init_frame, pred_flag=False, frame_flag=False,
-                normalize_flag=False, max_bbox_num=False, mask_flag=False, bbox_margin=False):
+                normalize_flag=False, max_bbox_num=False, mask_flag=False, 
+                bbox_margin=False, save_dir=False):
         """ frame include multi person.
 
         Args:
@@ -653,28 +675,16 @@ class DetectorHumanPose(Detector):
             if bbox_margin:
                 xmin, ymin, xmax, ymax = self.detector_body.add_bbox_margin(xmin, ymin, xmax, ymax, bbox_margin)
             bbox_frame = self.detector_body.crop_bbox_frame(frame, xmin, ymin, xmax, ymax)
+            self.human_body_image = copy(bbox_frame)
             if (bbox_frame.shape[0] == 0) or (bbox_frame.shape[1] == 0):
-                continue
+                continue            
             if mask_flag:
-                results_mask = self.segmentor.compute(bbox_frame, pred_flag=True, max_mask_num=1)
-                if len(results_mask['masks']) > 0:
-                    mask = results_mask['masks'][0]
-                    mask_canvas = np.zeros((3, mask.shape[0], mask.shape[1]))
-                    for num in range(len(mask_canvas)):
-                        mask_canvas[num] = mask
-                    mask_canvas = mask_canvas.transpose(1, 2, 0)
-                    bbox_frame = (bbox_frame * mask_canvas).astype(int)
-                else:
-                    logger.info('no mask')
-
-            canvas = self.generate_canvas(xmin, ymin, xmax, ymax, height, width)
-            canvas[0:bbox_frame.shape[0], 0:bbox_frame.shape[1]] = bbox_frame
+                bbox_frame = self.mask_compute(bbox_frame)
+                self.human_body_masked_image = copy(bbox_frame)
 
             # get points can detect only one person.
             # exception of detected area should be 0
-            points = self.get_points(canvas)
-            points = self.re_position(points, xmin, ymin)
-            filtered_points = self._filter_points(points, xmin, ymin, xmax, ymax)
+            filtered_points = self.extract_human_pose_points(xmin, ymin, xmax, ymax, bbox_frame)
 
             if pred_flag:
                 results['preds'][bbox_num] = {'points': filtered_points, 'bbox': (xmin, ymin, xmax, ymax)}
@@ -684,6 +694,8 @@ class DetectorHumanPose(Detector):
 
             if frame_flag:
                 frame = self.draw_pose(frame, filtered_points)
+                self.human_body_masked_image = frame[ymin:ymax, xmin:xmax]
+                
         if frame_flag:
             results['frame'] = frame
         return results
@@ -777,8 +789,6 @@ class Segmentor(Detector):
 
         n, c, h, w = self.shape
         assert n == 1, 'Only batch 1 is supported by the demo application'
-
-        logger.info('Starting inference...')
 
         # Resize the image to leave the same aspect ratio and to fit it to a window of a target size.
         scale = min(h / frame.shape[0], w / frame.shape[1])

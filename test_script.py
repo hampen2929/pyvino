@@ -1,6 +1,6 @@
 import sys
 from pyvino.model import Model
-from pyvino.detector import DetectorFace
+from pyvino.detector import DetectorFace, DetectorHumanPose
 from pyvino.util import imshow, cv2pil
 import cv2
 import numpy as np
@@ -20,10 +20,15 @@ def main():
     args = build_argparser().parse_args()
     test_image = './data/test/person1.jpg'
     frame = cv2.imread(test_image)
-    model = Model(args.task)
+    
+    # model = Model(args.task)
+    # new_frame = model.compute(frame)
+    
     # model = DetectorFace(model_fp='FP16')
-    new_frame = model.compute(frame, frame_flag=True)
+    model = DetectorHumanPose()
+    new_frame = model.compute(frame, frame_flag=True, mask_flag=True)
     new_frame = new_frame['frame']
+
     new_frame = np.asarray(cv2pil(new_frame))
     imshow(new_frame)
 
