@@ -44,6 +44,7 @@ TASKS = {
   "estimate_headpose": "head-pose-estimation-adas-0001",
   "detect_body": "person-detection-retail-0013",
   "estimate_humanpose": "human-pose-estimation-0001",
+  "estimate_humanpose_3d": "human-pose-estimation-3d",
   "detect_segmentation": "instance-segmentation-security-0050"
 }
 
