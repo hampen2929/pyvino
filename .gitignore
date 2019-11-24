@@ -19,3 +19,6 @@ build
 dist
 docs
 notebook
+
+*.png
+*.mp4
