@@ -1,13 +1,10 @@
-import os
 import cv2
 import numpy as np
 
-from openvino.inference_engine import IENetwork, IECore
+from openvino.inference_engine import IECore
 
 from ....util import get_logger
-from ...object_detection.object_detector import Detector
-from ...object_detection.body_detector import BodyDetector
-from ...instance_segmentation.instance_segmentor import InstanceSegmentor
+from ...base_model.base_model import BaseModel
 
 from .modules.draw import Plotter3d, draw_poses
 from .modules.parse_poses import parse_poses
@@ -16,7 +13,7 @@ from .modules.parse_poses import parse_poses
 logger = get_logger(__name__)
 
 
-class Human3DPoseDetector(Detector):
+class Human3DPoseDetector(BaseModel):
     BODY_PARTS = {
         'neck': 0, 'nose': 1, 'l_sho': 2, 'l_elb': 3, 'l_wri': 4, 'l_hip': 5,
         'l_knee': 6, 'l_ank': 7, 'r_sho': 8, 'r_elb': 9, 'r_wri': 10,
@@ -34,6 +31,13 @@ class Human3DPoseDetector(Detector):
     canvas_3d_window_name = 'Canvas 3D'
     cv2.namedWindow(canvas_3d_window_name)
     cv2.setMouseCallback(canvas_3d_window_name, Plotter3d.mouse_callback)
+    
+    def __init__(self):
+        self.task = 'estimate_humanpose_3d'
+        super().__init__(self.task)
+        self.thr_point = 0.1
+        self.fx = -1
+        self._set_data()
     
     # def __init__(self, device='CPU', net_model_xml_path='human-pose-estimation-3d.xml'):
     #     self.task = 'estimate_humanpose_3d'
@@ -71,25 +75,28 @@ class Human3DPoseDetector(Detector):
             [286.3860507]
             ]
         
-    def infer(self, img):
+    def get_result(self, img):
         """
         img: cropped as a human image
         """
+        self.ie = IECore()
+
         input_layer = next(iter(self.net.inputs))
         n, c, h, w = self.net.inputs[input_layer].shape
         if h != img.shape[0] or w != img.shape[1]:
             self.net.reshape({input_layer: (n, c, img.shape[0], img.shape[1])})
-            self.exec_net = self.ie.load_network(network=self.net, num_requests=1, device_name=self.device)
+            self.exec_net = self.ie.load_network(network=self.net,
+                                                 num_requests=1,
+                                                 device_name=self.device)
         img = np.transpose(img, (2, 0, 1))[None, ]
 
         inference_result = self.exec_net.infer(inputs={'data': img})
+        return inference_result
 
+    def pre_process(self, inference_result):
         inference_result = (inference_result['features'][0],
                             inference_result['heatmaps'][0], inference_result['pafs'][0])
         return inference_result
-    
-    def pre_process(self):
-        pass
     
     def rotate_poses(self, poses_3d, R, t):
         R_inv = np.linalg.inv(R)
@@ -99,20 +106,29 @@ class Human3DPoseDetector(Detector):
             poses_3d[pose_id] = pose_3d.transpose().reshape(-1)
         return poses_3d
     
+    def resize_input(self, frame):
+        self.input_scale = self.base_height / frame.shape[0]
+        scaled_img = cv2.resize(frame, dsize=None, fx=self.input_scale, fy=self.input_scale)
+        scaled_img = scaled_img[:, 0:scaled_img.shape[1] - (scaled_img.shape[1] % self.stride)]  # better to pad, but cut out for demo
+        return scaled_img
+    
     def compute(self, frame, theta=3.1415/4, phi=-3.1415/6):
         """
         frame: cropped as a human image
         """
+        scaled_img = self.resize_input(frame)        
         
-        input_scale = self.base_height / frame.shape[0]
-        scaled_img = cv2.resize(frame, dsize=None, fx=input_scale, fy=input_scale)
-        scaled_img = scaled_img[:, 0:scaled_img.shape[1] - (scaled_img.shape[1] % self.stride)]  # better to pad, but cut out for demo
         if self.fx < 0:  # Focal length is unknown
             self.fx = np.float32(0.8 * frame.shape[1])
+
+        inference_result = self.get_result(scaled_img)
         
-        inference_result = self.infer(scaled_img)
+        # TODO: if batch inference, fix
+        inference_result = (inference_result['features'][0],
+                            inference_result['heatmaps'][0],
+                            inference_result['pafs'][0],)
         
-        poses_3d, poses_2d = parse_poses(inference_result, input_scale, 
+        poses_3d, poses_2d = parse_poses(inference_result, self.input_scale, 
                                          self.stride, self.fx, is_video=False)
         edges = []
         if len(poses_3d):

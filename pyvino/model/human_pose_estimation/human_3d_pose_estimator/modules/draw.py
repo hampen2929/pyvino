@@ -33,8 +33,8 @@ class Plotter3d:
                                   [-axis_length / 2 + step_id * step, axis_length / 2, 0]], dtype=np.float32))
         self.axes = np.array(axes)
 
-    def plot(self, img, vertices, edges):
-        global theta, phi
+    def plot(self, img, vertices, edges, theta=3.1415/4, phi=-3.1415/6):
+        # global theta, phi
         img.fill(0)
         R = self._get_rotation(theta, phi)
         self._draw_axes(img, R)
