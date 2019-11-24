@@ -8,7 +8,7 @@ storage/
 __pycache__
 
 # notebook
-# *.ipynb
+*.ipynb
 .ipynb_checkpoints/
 
  # pycharm
@@ -19,3 +19,6 @@ build
 dist
 docs
 notebook
+
+*.png
+*.mp4
