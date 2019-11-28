@@ -38,31 +38,7 @@ class Human3DPoseDetector(BaseModel):
         self.thr_point = 0.1
         self.fx = -1
         self._set_data()
-    
-    # def __init__(self, device='CPU', net_model_xml_path='human-pose-estimation-3d.xml'):
-    #     self.task = 'estimate_humanpose_3d'
-    #     super().__init__(self.task)
-    #     self.thr_point = 0.1
-    #     self.detector_body = BodyDetector()
-    #     self.segmentor = InstanceSegmentor()
-    #     self.fx = -1
-    #     self._set_data()
-
-    #     ##########
-    #     self.device = device
-
-    #     net_model_bin_path = os.path.splitext(net_model_xml_path)[0] + '.bin'
-    #     self.net = IENetwork(model=net_model_xml_path, weights=net_model_bin_path)
-    #     required_input_key = {'data'}
-    #     assert required_input_key == set(self.net.inputs.keys()), \
-    #         'Demo supports only topologies with the following input key: {}'.format(', '.join(required_input_key))
-    #     required_output_keys = {'features', 'heatmaps', 'pafs'}
-    #     assert required_output_keys.issubset(self.net.outputs.keys()), \
-    #         'Demo supports only topologies with the following output keys: {}'.format(', '.join(required_output_keys))
-
-    #     self.ie = IECore()
-    #     self.exec_net = self.ie.load_network(network=self.net, num_requests=1, device_name=device)
-        
+            
     def _set_data(self):
         self.R = [
             [0.1656794936, 0.0336560618, -0.9856051821],
@@ -108,7 +84,9 @@ class Human3DPoseDetector(BaseModel):
     
     def resize_input(self, frame):
         self.input_scale = self.base_height / frame.shape[0]
-        scaled_img = cv2.resize(frame, dsize=None, fx=self.input_scale, fy=self.input_scale)
+        scaled_img = cv2.resize(frame, dsize=None,
+                                fx=self.input_scale,
+                                fy=self.input_scale)
         scaled_img = scaled_img[:, 0:scaled_img.shape[1] - (scaled_img.shape[1] % self.stride)]  # better to pad, but cut out for demo
         return scaled_img
     

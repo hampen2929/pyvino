@@ -15,7 +15,10 @@ __pycache__
 .idea 
 
 pyvino.egg-info/
-build
+# build
 dist
 docs
 notebook
+
+*.png
+*.mp4
