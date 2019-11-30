@@ -6,3 +6,5 @@ from .object_detection.object_detector import Detector
 from .object_detection.face_detector import FaceDetector
 from .object_detection.body_detector import BodyDetector
 from .object_recognition.emotion_recognizer import EmotionRecognizer
+from .reidentification.person_reidentifier import PersonReidentificator
+from .reidentification.face_reidentifier import FaceReidentificator

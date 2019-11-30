@@ -5,7 +5,9 @@ from pyvino.model import (FaceDetector,
                           Human3DPoseDetector,
                           HeadPoseDetector,
                           EmotionRecognizer,
-                          InstanceSegmentor)
+                          InstanceSegmentor,
+                          PersonReidentificator,
+                          FaceReidentificator,)
 import cv2
 
 
@@ -32,4 +34,13 @@ class TestModel(object):
         results = model.compute(input_frame)
         output_frame = results['frame']
         cv2.imwrite('pyvino/tests/data/{}.png'.format(model.task), output_frame)
-    
+        
+    @pytest.mark.parametrize('Model', [PersonReidentificator,
+                                       FaceReidentificator,
+                                     ])
+    def test_compute_vector(self, Model):
+        model = Model()
+        input_frame = self.load_image(TEST_BODY)
+        outputs = model.compute(input_frame)
+        dim = outputs.shape[0]
+        assert dim == 256
