@@ -120,9 +120,8 @@ class Human3DPoseDetector(BaseModel):
             poses_3d = poses_3d.reshape(poses_3d.shape[0], 19, -1)[:, :, 0:3]
             edges = (Plotter3d.SKELETON_EDGES + 19 * np.arange(poses_3d.shape[0]).reshape((-1, 1, 1))).reshape((-1, 2))
         self.plotter.plot(self.canvas_3d, poses_3d, edges, theta, phi)
-        draw_poses(frame, poses_2d)
+        frame_draw = draw_poses(frame, poses_2d)
         
         preds = {'pose_2d': poses_2d, 'pose_3d': poses_3d, 'edges': edges}
-        results = {'preds': preds, 'frame': frame, 'frame_3d': self.canvas_3d}
-        
+        results = {'preds': preds, 'frame': frame_draw, 'frame_3d': self.canvas_3d}
         return results

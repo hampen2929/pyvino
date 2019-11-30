@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from .one_euro_filter import OneEuroFilter
+from ..modules.one_euro_filter import OneEuroFilter
 
 
 class Pose:

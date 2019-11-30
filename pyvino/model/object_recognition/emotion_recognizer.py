@@ -25,7 +25,7 @@ class EmotionRecognizer(ObjectDetector):
             emotion = self.label[np.argmax(res[0])]
         return emotion
 
-    def compute(self, init_frame, pred_flag=False, frame_flag=False, rect=True):
+    def compute(self, init_frame, pred_flag=True, frame_flag=True, rect=True):
         assert isinstance(init_frame, np.ndarray)
         frame = init_frame.copy()
         faces = self.detector_face.get_pos(frame)

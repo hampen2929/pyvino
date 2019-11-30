@@ -100,7 +100,7 @@ class HeadPoseDetector(ObjectDetector):
         center_of_face = (xmin + face_frame.shape[1] / 2, ymin + face_frame.shape[0] / 2, 0)
         return center_of_face
 
-    def compute(self, init_frame, pred_flag=False, frame_flag=False):
+    def compute(self, init_frame, pred_flag=True, frame_flag=True):
         frame = init_frame.copy()
         faces = self.detector_face.get_pos(frame)
         results = {}
