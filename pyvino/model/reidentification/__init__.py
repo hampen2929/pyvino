@@ -1,2 +1,2 @@
-from .person_reidentifier import PersonReidentificator
-from .face_reidentifier import FaceReidentificator
+from .person_reidentifier import PersonReidentifier
+from .face_reidentifier import FaceReidentifier

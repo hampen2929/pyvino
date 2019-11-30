@@ -1,7 +1,7 @@
 from ..base_model.base_model import BaseModel
 
 
-class PersonReidentificator(BaseModel):
+class PersonReidentifier(BaseModel):
     def __init__(self, device=None,
                  model_fp=None, model_dir=None,
                  cpu_extension=None, path_config=None):
