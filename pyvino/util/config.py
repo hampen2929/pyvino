@@ -45,7 +45,9 @@ TASKS = {
   "detect_body": "person-detection-retail-0013",
   "estimate_humanpose": "human-pose-estimation-0001",
   "estimate_humanpose_3d": "human-pose-estimation-3d",
-  "detect_segmentation": "instance-segmentation-security-0050"
+  "detect_segmentation": "instance-segmentation-security-0050",
+  "person_reidentification": "person-reidentification-retail-0076",
+  "face_reidentification": "face-reidentification-retail-0095",
 }
 
 # Segmentor

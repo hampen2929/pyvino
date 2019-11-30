@@ -1,6 +1,4 @@
 import os
-import numpy as np
-import pandas as pd
 
 import cv2
 import urllib.request
@@ -219,3 +217,13 @@ class BaseModel(object):
         if self.exec_net.requests[0].wait(-1) == 0:
             result = self.exec_net.requests[0].outputs
         return result
+    
+    def post_process(self):
+        raise NotImplementedError
+    
+    def pre_process(self):
+        raise NotImplementedError
+    
+    def compute(self):
+        raise NotImplementedError
+    
