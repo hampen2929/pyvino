@@ -133,6 +133,8 @@ class BaseModel(object):
         elif openvino_ver == 'R4':
             # 2019 R4
             base_url = "https://download.01.org/opencv/2019/open_model_zoo/R4/20191121_190000_models_bin/{}/{}/{}"
+        else:
+            raise ValueError
             
         path_save_dir = self.model_dir
 
