@@ -16,7 +16,8 @@ logger = get_logger(__name__)
 class BaseModel(object):
     def __init__(self, task, device=None,
                  model_fp=None, model_dir=None,
-                 cpu_extension=None, path_config=None):
+                 cpu_extension=None, path_config=None,
+                 openvino_ver=None):
         """
 
         Args:
@@ -110,7 +111,7 @@ class BaseModel(object):
                 raise FileNotFoundError(cpu_extension)
         return cpu_extension
 
-    def _download_model(self, format_type):
+    def _download_model(self, format_type, openvino_ver=None):
         """
 
         Args:
@@ -123,8 +124,16 @@ class BaseModel(object):
         """
         if format_type not in ["xml", "bin"]:
             raise ValueError("format_type should be xml or bin")
-
-        base_url = "https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/{}/{}/{}"
+        if openvino_ver is None:
+            # 2019 R2
+            base_url = "https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/{}/{}/{}"
+        elif openvino_ver == 'R3':
+            # 2019 R3
+            base_url = "https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/{}/{}/{}"
+        elif openvino_ver == 'R4':
+            # 2019 R4
+            base_url = "https://download.01.org/opencv/2019/open_model_zoo/R4/20191121_190000_models_bin/{}/{}/{}"
+            
         path_save_dir = self.model_dir
 
         model_name_format = "{}.{}".format(self.model_name, format_type)
