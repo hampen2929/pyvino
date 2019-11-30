@@ -171,7 +171,7 @@ class HumanPoseDetector(Detector):
         filtered_points = self._filter_points(points, xmin, ymin, xmax, ymax)
         return filtered_points
 
-    def compute(self, init_frame, pred_flag=False, frame_flag=False,
+    def compute(self, init_frame, pred_flag=True, frame_flag=True,
                 normalize_flag=False, max_bbox_num=False, mask_flag=False, 
                 bbox_margin=False, save_dir=False):
         """ frame include multi person.

@@ -71,7 +71,7 @@ class InstanceSegmentor(Detector):
         input_image_info = np.asarray([[input_image_size[0], input_image_size[1], scale]], dtype=np.float32)
         return input_image, input_image_info
 
-    def compute(self, init_frame, pred_flag=False, frame_flag=False,
+    def compute(self, init_frame, pred_flag=True, frame_flag=True,
                 show_boxes=False, show_scores=False, max_mask_num=False):
         """
 

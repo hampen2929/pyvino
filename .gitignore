@@ -19,6 +19,8 @@ build
 dist
 docs
 notebook
+tmp
+/build
 
 *.png
 *.mp4

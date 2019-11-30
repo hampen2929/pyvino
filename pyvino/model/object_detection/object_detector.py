@@ -280,7 +280,7 @@ class ObjectDetector(Detector):
         ymax = int(ymax * (1 + bbox_margin))
         return xmin, ymin, xmax, ymax
 
-    def compute(self, init_frame, pred_flag=False, frame_flag=False, 
+    def compute(self, init_frame, pred_flag=True, frame_flag=True, 
                 max_bbox_num=None, bbox_margin=False):
         # copy frame to prevent from overdraw results
         frame = init_frame.copy()

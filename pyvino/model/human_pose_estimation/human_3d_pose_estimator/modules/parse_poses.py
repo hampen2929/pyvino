@@ -1,9 +1,9 @@
 import numpy as np
 
-from .pose import Pose, propagate_ids
+from ..modules.pose import Pose, propagate_ids
 from pose_extractor import extract_poses
 
-AVG_PERSON_HEIGHT = 170
+AVG_PERSON_HEIGHT = 180
 
 # pelvis (body center) is missing, id == 2
 map_id_to_panoptic = [1, 0, 9, 10, 11, 3, 4, 5, 12, 13, 14, 6, 7, 8, 15, 16, 17, 18]

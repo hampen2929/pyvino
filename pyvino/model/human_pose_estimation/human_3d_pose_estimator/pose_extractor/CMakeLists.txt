@@ -4,9 +4,6 @@ project(pose_extractor)
 find_package(PythonInterp 3.5 REQUIRED)
 find_package(PythonLibs 3.5 REQUIRED)
 
-message("Python executable: ${PYTHON_EXECUTABLE}")
-message("Python libraries: ${PYTHON_LIBRARIES}")
-
 exec_program(${PYTHON_EXECUTABLE}
              ARGS "-c \"import numpy; print(numpy.get_include())\""
              OUTPUT_VARIABLE NUMPY_INCLUDE_DIR
