@@ -7,8 +7,6 @@ from pyvino.model import (FaceDetector,
                           EmotionRecognizer,
                           InstanceSegmentor)
 import cv2
-from PIL import Image
-import numpy as np
 
 
 TEST_FACE = './data/test/face.jpg'
