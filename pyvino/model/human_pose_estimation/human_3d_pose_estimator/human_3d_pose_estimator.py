@@ -15,11 +15,20 @@ logger = get_logger(__name__)
 
 class Human3DPoseDetector(BaseModel):
     BODY_PARTS = {
-        'neck': 0, 'nose': 1, 'l_sho': 2, 'l_elb': 3, 'l_wri': 4, 'l_hip': 5,
-        'l_knee': 6, 'l_ank': 7, 'r_sho': 8, 'r_elb': 9, 'r_wri': 10,
-        'r_hip': 11, 'r_knee': 12, 'r_ank': 13, 'r_eye': 14, 'l_eye': 15,
-        'r_ear': 16,'l_ear': 17
+        'neck': 0, 'nose': 1, 'center_balance': 2, 'l_sho': 3, 'l_elb': 4,
+        'l_wri': 5, 'l_hip': 6, 'l_knee': 7, 'l_ank': 8, 'r_sho': 9, 
+        'r_elb': 10, 'r_wri': 11, 'r_hip': 12, 'r_knee': 13, 'r_ank': 14,
+        'r_eye': 15, 'l_eye': 16, 'r_ear': 17,'l_ear': 18
     }
+    
+    BODY_EDGES = np.array(
+    [[0, 1],  # neck - nose
+     [1, 16], [16, 18],  # nose - l_eye - l_ear
+     [1, 15], [15, 17],  # nose - r_eye - r_ear
+     [0, 3], [3, 4], [4, 5],     # neck - l_shoulder - l_elbow - l_wrist
+     [0, 9], [9, 10], [10, 11],  # neck - r_shoulder - r_elbow - r_wrist
+     [0, 6], [6, 7], [7, 8],        # neck - l_hip - l_knee - l_ankle
+     [0, 12], [12, 13], [13, 14]])  # neck - r_hip - r_knee - r_ankle
     
     base_height = 256
     stride = 8
@@ -121,6 +130,8 @@ class Human3DPoseDetector(BaseModel):
             edges = (Plotter3d.SKELETON_EDGES + 19 * np.arange(poses_3d.shape[0]).reshape((-1, 1, 1))).reshape((-1, 2))
         self.plotter.plot(self.canvas_3d, poses_3d, edges, theta, phi)
         frame_draw = draw_poses(frame, poses_2d)
+        
+        poses_2d = np.array(poses_2d[0][0:-1]).reshape((-1, 3)).transpose().T
         
         preds = {'pose_2d': poses_2d, 'pose_3d': poses_3d, 'edges': edges}
         results = {'preds': preds, 'frame': frame_draw, 'frame_3d': self.canvas_3d}
