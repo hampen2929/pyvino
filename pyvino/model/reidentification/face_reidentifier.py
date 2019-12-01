@@ -1,7 +1,7 @@
 from ..base_model.base_model import BaseModel
 
 
-class FaceReidentificator(BaseModel):
+class FaceReidentifier(BaseModel):
     def __init__(self, device=None,
                  model_fp=None, model_dir=None,
                  cpu_extension=None, path_config=None):
