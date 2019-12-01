@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from copy import copy
 
 from openvino.inference_engine import IECore
 
@@ -133,6 +134,12 @@ class Human3DPoseDetector(BaseModel):
         
         poses_2d = np.array(poses_2d[0][0:-1]).reshape((-1, 3)).transpose().T
         
-        preds = {'pose_2d': poses_2d, 'pose_3d': poses_3d, 'edges': edges}
+        height, width, _ = frame.shape
+        pose_2d_norm = copy(poses_2d)
+        pose_2d_norm[:, 0] = poses_2d[:, 0] / width
+        pose_2d_norm[:, 1] = poses_2d[:, 1] / height
+        
+        preds = {'pose_2d': poses_2d, 'pose_2d_norm': pose_2d_norm,
+                 'pose_3d': poses_3d, 'edges': edges}
         results = {'preds': preds, 'frame': frame_draw, 'frame_3d': self.canvas_3d}
         return results
