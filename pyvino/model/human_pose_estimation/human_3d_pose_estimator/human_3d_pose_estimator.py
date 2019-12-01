@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from copy import copy
 
 from openvino.inference_engine import IECore
 
@@ -131,8 +132,26 @@ class Human3DPoseDetector(BaseModel):
         self.plotter.plot(self.canvas_3d, poses_3d, edges, theta, phi)
         frame_draw = draw_poses(frame, poses_2d)
         
-        poses_2d = np.array(poses_2d[0][0:-1]).reshape((-1, 3)).transpose().T
+        if len(poses_2d) > 0:        
+            poses_2d = np.array(poses_2d[0][0:-1]).reshape((-1, 3)).transpose().T
+            poses_2d = np.where(poses_2d < 0, np.nan, poses_2d)
+            
+            # norm
+            height, width, _ = frame.shape
+            pose_2d_norm = copy(poses_2d)
+            pose_2d_norm[:, 0] = poses_2d[:, 0] / width
+            pose_2d_norm[:, 1] = poses_2d[:, 1] / height
+            
+            # L2 norm
+            l2_norm = np.linalg.norm(pose_2d_norm, ord=2)
+            pose_2d_l2_norm = pose_2d_norm / l2_norm
+            
+        else:
+            pose_2d_norm = []
+            pose_2d_l2_norm = []
+            
         
-        preds = {'pose_2d': poses_2d, 'pose_3d': poses_3d, 'edges': edges}
+        preds = {'pose_2d': poses_2d, 'pose_2d_norm': pose_2d_norm, 'pose_2d_l2_norm': pose_2d_l2_norm,
+                 'pose_3d': poses_3d, 'edges': edges}
         results = {'preds': preds, 'frame': frame_draw, 'frame_3d': self.canvas_3d}
         return results

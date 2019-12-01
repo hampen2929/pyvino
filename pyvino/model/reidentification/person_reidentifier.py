@@ -1,4 +1,5 @@
 from ..base_model.base_model import BaseModel
+from ...util.image import l2_normalization
 
 
 class PersonReidentifier(BaseModel):
@@ -9,13 +10,14 @@ class PersonReidentifier(BaseModel):
         super().__init__(self.task, device,
                          model_fp, model_dir,
                          cpu_extension, path_config)
-    
+           
     def pre_process(self, input_frame):
         return input_frame
     
     def post_process(self, results):
         outputs = results['embd/dim_red/conv']
         outputs = outputs.flatten()
+        outputs = l2_normalization(outputs)
         return outputs
     
     def compute(self, input_frame):
@@ -32,5 +34,3 @@ class PersonReidentifier(BaseModel):
         results = self.get_result(processed_frame)
         outputs = self.post_process(results)
         return outputs
-    
-    
