@@ -1,5 +1,5 @@
 from ..base_model.base_model import BaseModel
-
+from ...util.image import l2_normalization
 
 class FaceReidentifier(BaseModel):
     def __init__(self, device=None,
@@ -11,12 +11,13 @@ class FaceReidentifier(BaseModel):
                          cpu_extension, path_config)
     
     def pre_process(self, input_frame):
-        return input_frame
+        return input_frame      
     
     def post_process(self, results):
         # TODO: is it correct?
         outputs = results['658']
         outputs = outputs.flatten()
+        outputs = l2_normalization(outputs)
         return outputs
     
     def compute(self, input_frame):

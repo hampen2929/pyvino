@@ -60,3 +60,9 @@ def cam_test(model):
 def load_image(path_image):
     frame = np.array(Image.open(path_image))
     return frame
+
+
+def l2_normalization(v):
+    l2_norm = np.linalg.norm(v, ord=2)
+    v_l2_norm = v / l2_norm
+    return v_l2_norm 
