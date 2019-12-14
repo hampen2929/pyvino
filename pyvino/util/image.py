@@ -66,3 +66,37 @@ def l2_normalization(v):
     l2_norm = np.linalg.norm(v, ord=2)
     v_l2_norm = v / l2_norm
     return v_l2_norm 
+
+
+def fig2cv(fig):
+    fig.canvas.draw()
+    # im = np.array(fig.canvas.renderer.buffer_rgba())
+    im = np.array(fig.canvas.renderer._renderer) # matplotlibが3.1より前の場合
+    im = cv2.cvtColor(im, cv2.COLOR_RGBA2BGR)
+    return im
+
+
+def plot_3d_pose(pose_3d):
+    if pose_3d.shape[0]>1:
+        pose_3d = pose_3d[0]
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(pose_3d[:, 0], pose_3d[:, 1], pose_3d[:, 2], alpha=0.4, color='red')
+    for body_edge in body_edges:
+        ax.plot(
+            (pose_3d[body_edge[0]][0], pose_3d[body_edge[1]][0]),
+            (pose_3d[body_edge[0]][1], pose_3d[body_edge[1]][1]),
+            (pose_3d[body_edge[0]][2], pose_3d[body_edge[1]][2]),
+        color='skyblue')
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.set_xlim(-100,100)
+    ax.set_ylim(100,200)
+    ax.set_ylim(-200,0)
+    return fig
+
+def scale_to_height(img, height):
+    scale = height / img.shape[0]
+    return cv2.resize(img, dsize=None, fx=scale, fy=scale)
