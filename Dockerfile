@@ -1,6 +1,16 @@
 # base
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
+# ubuntu setting
+WORKDIR /workspace/base_dir
+RUN useradd -m -s /bin/bash ubuntu
+
+RUN echo 'ubuntu:ubuntu' |chpasswd
+RUN gpasswd -a ubuntu sudo
+USER ubuntu
+WORKDIR /workspace/base_dir
+
+USER root
 # openvino
 ENV http_proxy $HTTP_PROXY
 ENV https_proxy $HTTP_PROXY
@@ -53,7 +63,7 @@ RUN mkdir -p ${TEMP_PATH} && cd ${TEMP_PATH} && \
 RUN rm -rf ${TEMP_PATH}
 ENV PATH /opt/conda/bin:$PATH
  
-# Install Intel Python 3 Full Package
+# Install Intel Python 3 core Package
 ENV ACCEPT_INTEL_PYTHON_EULA=yes
 RUN conda create -n idp python==3.6.8 -y
 RUN source activate idp
