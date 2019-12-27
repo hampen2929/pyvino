@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     zip \
     unzip \
     curl \
+    xterm \
     lsb-release && \
     rm -rf /var/lib/apt/lists/*
 RUN mkdir -p $TEMP_DIR && cd $TEMP_DIR && \
@@ -74,5 +75,20 @@ RUN conda config --add channels intel \
     && apt-get install -y -q g++ \
     && apt-get autoremove
 RUN conda install numpy -c intel --no-update-deps
- 
+
+# CMAKE
+RUN sudo apt remove cmake -y
+ARG DOWNLOAD_LINK=https://github.com/Kitware/CMake/releases/download/v3.16.2/cmake-3.16.2-Linux-x86_64.sh
+ARG TEMP_DIR=/tmp/cmake_installer
+RUN mkdir -p $TEMP_DIR && cd $TEMP_DIR && \
+    wget -c $DOWNLOAD_LINK && \
+    chmod +x cmake-*-Linux-x86_64.sh \
+    sudo sh cmake-*-Linux-x86_64.sh --skip-license \
+RUN sudo mv cmake-*-Linux-x86_64 /opt \
+    sudo ln -s /opt/cmake-*-Linux-x86_64/bin/* /usr/bin
+
+# jupyter notebook
+RUN jupyter notebook --generate-config
+RUN ipython kernel install --user --name=idp --display-name=idp
+
 CMD ["/bin/bash"]
