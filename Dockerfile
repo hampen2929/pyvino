@@ -2,13 +2,12 @@
 FROM ubuntu:18.04
 
 # ubuntu setting
-WORKDIR /workspace/base_dir
 RUN useradd -m -s /bin/bash ubuntu
 
 RUN echo 'ubuntu:ubuntu' |chpasswd
 RUN gpasswd -a ubuntu sudo
 USER ubuntu
-WORKDIR /workspace/base_dir
+WORKDIR /home/ubuntu/
 
 USER root
 # openvino
@@ -76,19 +75,22 @@ RUN conda config --add channels intel \
     && apt-get autoremove
 RUN conda install numpy -c intel --no-update-deps
 
+# jupyter notebook
+RUN pip install jupyter
+RUN jupyter notebook --generate-config
+RUN ipython kernel install --user --name=idp --display-name=idp
+
 # CMAKE
+RUN apt-get update
 RUN sudo apt remove cmake -y
 ARG DOWNLOAD_LINK=https://github.com/Kitware/CMake/releases/download/v3.16.2/cmake-3.16.2-Linux-x86_64.sh
 ARG TEMP_DIR=/tmp/cmake_installer
-RUN mkdir -p $TEMP_DIR && cd $TEMP_DIR && \
-    wget -c $DOWNLOAD_LINK && \
-    chmod +x cmake-*-Linux-x86_64.sh \
-    sudo sh cmake-*-Linux-x86_64.sh --skip-license \
-RUN sudo mv cmake-*-Linux-x86_64 /opt \
-    sudo ln -s /opt/cmake-*-Linux-x86_64/bin/* /usr/bin
 
-# jupyter notebook
-RUN jupyter notebook --generate-config
-RUN ipython kernel install --user --name=idp --display-name=idp
+RUN mkdir -p $TEMP_DIR && cd $TEMP_DIR
+RUN wget $DOWNLOAD_LINK
+RUN chmod +x cmake-*-Linux-x86_64.sh 
+RUN sudo bash cmake-*-Linux-x86_64.sh --skip-license
+# RUN sudo mv cmake-*-Linux-x86_64 /opt
+RUN sudo ln -s /opt/cmake-*-Linux-x86_64/bin/* /usr/bin
 
 CMD ["/bin/bash"]

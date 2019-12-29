@@ -26,39 +26,7 @@ Computed results by models are as below.
 
 # Installation
 ## Use docker
-build
-```
-docker build -t pyvino_image .
-```
-
-run
-```
-docker run -it \
---name pyvino \
--e DISPLAY=$DISPLAY \
--v /tmp/.X11-unix/:/tmp/.X11-unix \
--v /Users/yuya/src:/workspace/base_dir \
--p 8888:8888 \
-pyvino_image \
-/bin/bash
-```
-
-start
-```
-docker start pyvino
-```
-
-```
-docker exec -it pyvino bash
-```
-
-```
-export PYTHONPATH=/workspace/base_dir/pyvino/pyvino/model/human_pose_estimation/human_3d_pose_estimator/pose_extractor/build
-```
-
-```
-jupyter notebook --port 8888 --ip=0.0.0.0 --allow-root
-```
+Click [HERE](https://github.com/hampen2929/pyvino/blob/master/DOCKER.md) for installation instructions using docker.
 
 ## No use docker
 Click [HERE](https://github.com/hampen2929/pyvino/blob/master/INSTALL.md) for installation instructions.

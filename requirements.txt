@@ -1,3 +1,5 @@
 numpy
 pandas
 pytest==5.0.1
+matplotlib
+pillow

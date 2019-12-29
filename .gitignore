@@ -21,6 +21,7 @@ docs
 notebook
 tmp
 /build
+/intel_models
 
 *.png
 *.mp4
