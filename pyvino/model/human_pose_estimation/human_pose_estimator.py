@@ -16,9 +16,14 @@ class HumanPoseDetector(Detector):
     https://github.com/opencv/opencv/blob/master/samples/dnn/openpose.py
     """
 
-    def __init__(self):
+    def __init__(self, device=None,
+                 model_fp=None, model_dir=None,
+                 cpu_extension=None, path_config=None):
         self.task = 'estimate_humanpose'
-        super().__init__(self.task)
+        super().__init__(self.task, device,
+                         model_fp, model_dir,
+                         cpu_extension, path_config)
+
         self.thr_point = 0.1
         self.detector_body = BodyDetector()
         self.segmentor = InstanceSegmentor()

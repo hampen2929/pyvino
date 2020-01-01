@@ -242,24 +242,38 @@ class ObjectDetector(Detector):
     def get_frame_shape(self, frame):
         self.frame_h, self.frame_w = frame.shape[:2]
 
-    def get_pos(self, frame, max_bbox_num=False, th=0.5):
+    def get_pos(self, frame, max_bbox_num=False, conf_th=0.8):
         result = self.get_result(frame)[self.out_blob]
         # prob threshold : 0.5
-        bboxes = result[0][:, np.where(result[0][0][:, 2] > th)][0][0]
+        bboxes = result[0][:, np.where(result[0][0][:, 2] > conf_th)][0][0]
         if max_bbox_num:
-            bbox_sizes = np.zeros((len(bboxes)))
-            for bbox_num, bbox in enumerate(bboxes):
-                xmin, ymin, xmax, ymax = self.get_box(bbox, frame)
-                bbox_size = self.get_bbox_size(xmin, ymin, xmax, ymax)
-                bbox_sizes[bbox_num] = bbox_size
-            df = pd.DataFrame(bbox_sizes, columns=['bbox_size'])
-            target_bbox_nums = df.sort_values(ascending=False, by='bbox_size')[0: max_bbox_num]['bbox_size'].index
-            bboxes = bboxes[target_bbox_nums]
+            bbox_size = (bboxes[:, 5] - bboxes[:, 3]) * (bboxes[:, 6] - bboxes[:, 4])
+            idxs = np.argsort(bbox_size)[::-1]
+            bboxes = bboxes[idxs[0: max_bbox_num]]            
+        else:
+            pass
+        
+        # if max_bbox_num:
+        #     bbox_sizes = np.zeros((len(bboxes)))
+        #     for bbox_num, bbox in enumerate(bboxes):
+        #         xmin, ymin, xmax, ymax = self.get_box(bbox, frame)
+        #         bbox_size = self.get_bbox_size(xmin, ymin, xmax, ymax)
+        #         bbox_sizes[bbox_num] = bbox_size
+        #     df = pd.DataFrame(bbox_sizes, columns=['bbox_size'])
+        #     target_bbox_nums = df.sort_values(ascending=False, by='bbox_size')[0: max_bbox_num]['bbox_size'].index
+        #     bboxes = bboxes[target_bbox_nums]
         return bboxes
 
     def get_bbox_size(self, xmin, ymin, xmax, ymax):
         bbox_size = (xmax - xmin) * (ymax - ymin)
         return bbox_size
+    
+    def filter_bbox(self, xmin, ymin, xmax, ymax):
+        xmin = np.maximum(0, xmin)
+        ymin = np.maximum(0, ymin)
+        xmax = np.minimum(self.width, xmax)
+        ymax = np.minimum(self.height, ymax)
+        return xmin, ymin, xmax, ymax
 
     def add_bbox_margin(self, xmin, ymin, xmax, ymax, bbox_margin):
         """add margin to bbox
@@ -281,32 +295,27 @@ class ObjectDetector(Detector):
         return xmin, ymin, xmax, ymax
 
     def compute(self, init_frame, pred_flag=True, frame_flag=True, 
-                max_bbox_num=None, bbox_margin=False):
+                max_bbox_num=None, bbox_margin=False, conf_th=0.8):
         # copy frame to prevent from overdraw results
         frame = init_frame.copy()
-        bboxes = self.get_pos(frame)
+        self.height, self.width, _ = frame.shape
+        bboxes = self.get_pos(frame, max_bbox_num, conf_th)
         results = {}
         results['preds'] = {}
         for bbox_num, bbox in enumerate(bboxes):
             xmin, ymin, xmax, ymax = self.get_box(bbox, frame)
             if bbox_margin:
                 xmin, ymin, xmax, ymax = self.add_bbox_margin(xmin, ymin, xmax, ymax, bbox_margin=bbox_margin)
+            xmin, ymin, xmax, ymax = self.filter_bbox(xmin, ymin, xmax, ymax)
             bbox_size = self.get_bbox_size(xmin, ymin, xmax, ymax)
             if pred_flag:
                 results['preds'][bbox_num] = {'label': bbox[1],
                                               'conf': bbox[2],
                                               'bbox': (xmin, ymin, xmax, ymax),
                                               'bbox_size': bbox_size}
-                if max_bbox_num:
-                    df = pd.DataFrame(results['preds'])
-                    target_bbox_nums = list(df.loc['bbox_size'].sort_values(ascending=False)[0: max_bbox_num].index)
-                    keys = list(results['preds'].keys())
-                    removed_nums = list(set(target_bbox_nums) ^ set(keys))
-                    for removed_num in removed_nums:
-                        results['preds'].pop(removed_num)
-
             if frame_flag:
                 cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
         if frame_flag:
             results['frame'] = frame
+        
         return results
