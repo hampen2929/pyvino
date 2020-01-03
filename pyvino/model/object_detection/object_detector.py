@@ -7,6 +7,7 @@ import urllib.request
 
 from openvino.inference_engine import IENetwork, IEPlugin
 from ...util.config import (TASKS, load_config)
+from ...util.image import generate_canvas
 from ...util import get_logger
 import platform
 
@@ -252,16 +253,6 @@ class ObjectDetector(Detector):
             bboxes = bboxes[idxs[0: max_bbox_num]]            
         else:
             pass
-        
-        # if max_bbox_num:
-        #     bbox_sizes = np.zeros((len(bboxes)))
-        #     for bbox_num, bbox in enumerate(bboxes):
-        #         xmin, ymin, xmax, ymax = self.get_box(bbox, frame)
-        #         bbox_size = self.get_bbox_size(xmin, ymin, xmax, ymax)
-        #         bbox_sizes[bbox_num] = bbox_size
-        #     df = pd.DataFrame(bbox_sizes, columns=['bbox_size'])
-        #     target_bbox_nums = df.sort_values(ascending=False, by='bbox_size')[0: max_bbox_num]['bbox_size'].index
-        #     bboxes = bboxes[target_bbox_nums]
         return bboxes
 
     def get_bbox_size(self, xmin, ymin, xmax, ymax):
@@ -297,8 +288,14 @@ class ObjectDetector(Detector):
     def compute(self, init_frame, pred_flag=True, frame_flag=True, 
                 max_bbox_num=None, bbox_margin=False, conf_th=0.8):
         # copy frame to prevent from overdraw results
-        frame = init_frame.copy()
-        self.height, self.width, _ = frame.shape
+        frame_org = init_frame.copy()
+        
+        self.height, self.width, _ = frame_org.shape
+        frame = generate_canvas(0, 0, self.width, self.height)
+        frame[0:self.height, 0:self.width] = frame_org
+        
+        cv2.imwrite('test.png', frame)
+        
         bboxes = self.get_pos(frame, max_bbox_num, conf_th)
         results = {}
         results['preds'] = {}

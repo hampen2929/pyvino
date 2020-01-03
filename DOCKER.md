@@ -8,7 +8,7 @@ docker build -t pyvino_image .
 
 ```
 docker run -it \
---name pyvino \
+--name pyvino2 \
 -e DISPLAY=$DISPLAY \
 -v /tmp/.X11-unix:/tmp/.X11-unix \
 -v /Users/yuya/src:/home/ubuntu/src \
