@@ -1,7 +1,7 @@
 # build
 
 ```
-docker build -t pyvino_image .
+docker build -t pyvino_image2 .
 ```
 
 # run
@@ -13,18 +13,18 @@ docker run -it \
 -v /tmp/.X11-unix:/tmp/.X11-unix \
 -v /Users/yuya/src:/home/ubuntu/src \
 -p 8888:8888 \
-pyvino_image \
+pyvino_image2 \
 /bin/bash
 ```
 
 # start
 ```
-docker start pyvino
+docker start pyvino2
 ```
 
 # exec
 ```
-docker exec -it pyvino bash
+docker exec -it pyvino2 bash
 ```
 
 # env

@@ -293,9 +293,7 @@ class ObjectDetector(Detector):
         self.height, self.width, _ = frame_org.shape
         frame = generate_canvas(0, 0, self.width, self.height)
         frame[0:self.height, 0:self.width] = frame_org
-        
-        cv2.imwrite('test.png', frame)
-        
+                
         bboxes = self.get_pos(frame, max_bbox_num, conf_th)
         results = {}
         results['preds'] = {}
