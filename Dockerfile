@@ -2,11 +2,11 @@
 FROM ubuntu:18.04
 
 # ubuntu setting
-RUN useradd -m -s /bin/bash ubuntu
+# RUN useradd -m -s /bin/bash ubuntu
 
-RUN echo 'ubuntu:ubuntu' |chpasswd
-RUN gpasswd -a ubuntu sudo
-USER ubuntu
+# RUN echo 'ubuntu:ubuntu' |chpasswd
+# RUN gpasswd -a ubuntu sudo
+# USER ubuntu
 WORKDIR /home/ubuntu/
 
 USER root
@@ -41,7 +41,8 @@ RUN $INSTALL_DIR/install_dependencies/install_openvino_dependencies.sh
 RUN mkdir $INSTALL_DIR/deployment_tools/inference_engine/samples/build && cd $INSTALL_DIR/deployment_tools/inference_engine/samples/build && \
     /bin/bash -c "source $INSTALL_DIR/bin/setupvars.sh && cmake .. && make -j1"
 
-RUN echo "source $INSTALL_DIR/bin/setupvars.sh" >> /root/.bashrc
+# RUN echo "source $INSTALL_DIR/bin/setupvars.sh" >> /root/.bashrc
+RUN echo source /opt/intel/openvino/bin/setupvars.sh  >> ~/.bashrc
 
 SHELL ["/bin/bash", "-c"]
 
@@ -80,19 +81,33 @@ RUN pip install jupyter
 RUN jupyter notebook --generate-config
 RUN ipython kernel install --user --name=idp --display-name=idp
 
-# CMAKE
-# RUN apt-get update
-# RUN sudo apt remove cmake -y
-# ARG DOWNLOAD_LINK=https://github.com/Kitware/CMake/releases/download/v3.16.2/cmake-3.16.2-Linux-x86_64.sh
-# ARG TEMP_DIR=/home/ubuntu/cmake_installer
 
-# RUN mkdir -p $TEMP_DIR && cd $TEMP_DIR
-# RUN wget $DOWNLOAD_LINK
-# RUN chmod +x cmake-*-Linux-x86_64.sh 
-# RUN sudo bash cmake-*-Linux-x86_64.sh --skip-license
-# RUN sudo mv cmake-*-Linux-x86_64 /opt
-# RUN sudo ln -s $TEMP_DIR/cmake-*-Linux-x86_64/bin/* /usr/bin
+# CMAKE
+RUN apt-get update
+RUN sudo apt remove cmake -y
+ARG DOWNLOAD_LINK=https://github.com/Kitware/CMake/releases/download/v3.16.2/cmake-3.16.2-Linux-x86_64.sh
+ARG TEMP_DIR=/home/ubuntu/cmake_installer/cmake-3.16.2-Linux-x86_64/
+
+RUN mkdir -p $TEMP_DIR && cd $TEMP_DIR \
+    && wget $DOWNLOAD_LINK \
+    && chmod +x cmake-*-Linux-x86_64.sh \
+    && sudo bash cmake-*-Linux-x86_64.sh --skip-license \
+    && cd .. \
+    && ls \
+    && sudo mv cmake-*-Linux-x86_64 /opt \
+    && sudo ln -s /opt/cmake-3.16.2-Linux-x86_64/bin/* /usr/bin
 
 # export PATH=TEMP_DIR/bin:$PATH
 
+# env path
+RUN echo LC_ALL=C.UTF-8  >> ~/.bashrc
+RUN echo LANG=C.UTF-8  >> ~/.bashrc
+
+# pyvino
+RUN PYTHONPATH=/home/ubuntu/src/pyvino/pyvino/model/human_pose_estimation/human_3d_pose_estimator/pose_extractor/build/ >> /root/.bashrc
+
+# env activate
+RUN echo source activate idp  >> ~/.bashrc
+
+# USER ubuntu
 CMD ["/bin/bash"]

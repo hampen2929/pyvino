@@ -100,3 +100,22 @@ def plot_3d_pose(pose_3d):
 def scale_to_height(img, height):
     scale = height / img.shape[0]
     return cv2.resize(img, dsize=None, fx=scale, fy=scale)
+
+
+def generate_canvas(xmin, ymin, xmax, ymax, ratio_frame=16/9):
+    height_bbox = ymax - ymin
+    width_bbox = xmax - xmin
+    ratio_bbox = width_bbox / height_bbox
+
+    if ratio_bbox < ratio_frame:
+        width_canvas = int(height_bbox * ratio_frame)
+        canvas_org = np.zeros((height_bbox, width_canvas, 3), np.uint8)
+    elif ratio_bbox > ratio_frame:
+        height_canvas = int(width_bbox / ratio_frame)
+        canvas_org = np.zeros((height_canvas, width_bbox, 3), np.uint8)
+    elif ratio_bbox == ratio_frame:
+        canvas_org = np.zeros((height_bbox, width_bbox, 3), np.uint8)
+    else:
+        raise ValueError
+    return canvas_org
+
