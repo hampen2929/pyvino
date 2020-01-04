@@ -26,7 +26,14 @@ pyvino_image \
 /bin/bash
 ```
 
-## acativate 
+## setup
+```
+cd $HOME/src_dir/pyvino
+python setup.py install
+```
+
+
+<!-- ## activate 
 ```
 source activate idp
 ```
@@ -34,12 +41,21 @@ source activate idp
 ## env
 path to pose extractor module for 3d pose estimation
 ```
-export PYTHONPATH=/home/ubuntu/pyvino/pyvino/model/human_pose_estimation/human_3d_pose_estimator/pose_extractor/build/
+export PYTHONPATH=/home/ubuntu/src_dir/pyvino/pyvino/model/human_pose_estimation/human_3d_pose_estimator/pose_extractor/build/
 ```
 
 setupvars for openvino
 ```
 source /opt/intel/openvino/bin/setupvars.sh
+``` -->
+
+## test
+```
+pytest pyvino
+```
+cheack result here
+```
+$HOME/src_dir/pyvino/pyvino/tests/data
 ```
 
 ## jupyter notebook

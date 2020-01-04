@@ -2,11 +2,11 @@
 FROM ubuntu:18.04
 
 # ubuntu setting
-RUN useradd -m -s /bin/bash ubuntu
+# RUN useradd -m -s /bin/bash ubuntu
 
-RUN echo 'ubuntu:ubuntu' |chpasswd
-RUN gpasswd -a ubuntu sudo
-USER ubuntu
+# RUN echo 'ubuntu:ubuntu' |chpasswd
+# RUN gpasswd -a ubuntu sudo
+# USER ubuntu
 WORKDIR /home/ubuntu/
 
 USER root
@@ -41,7 +41,7 @@ RUN $INSTALL_DIR/install_dependencies/install_openvino_dependencies.sh
 RUN mkdir $INSTALL_DIR/deployment_tools/inference_engine/samples/build && cd $INSTALL_DIR/deployment_tools/inference_engine/samples/build && \
     /bin/bash -c "source $INSTALL_DIR/bin/setupvars.sh && cmake .. && make -j1"
 
-RUN echo "source $INSTALL_DIR/bin/setupvars.sh" >> /root/.bashrc
+RUN echo source $INSTALL_DIR/bin/setupvars.sh >> ~/.bashrc
 
 SHELL ["/bin/bash", "-c"]
 
@@ -74,6 +74,8 @@ RUN conda config --add channels intel \
     && apt-get install -y -q g++ \
     && apt-get autoremove
 RUN conda install numpy -c intel --no-update-deps
+# env
+RUN echo source activate idp  >> ~/.bashrc
 
 # jupyter notebook
 RUN pip install jupyter
@@ -102,10 +104,7 @@ RUN echo LC_ALL=C.UTF-8  >> ~/.bashrc
 RUN echo LANG=C.UTF-8  >> ~/.bashrc
 
 # pyvino
-RUN PYTHONPATH=/home/ubuntu/src/pyvino/pyvino/model/human_pose_estimation/human_3d_pose_estimator/pose_extractor/build/ >> /root/.bashrc
-
-# env activate
-RUN echo source activate idp  >> ~/.bashrc
+RUN echo PYTHONPATH=/home/ubuntu/src_dir/pyvino/pyvino/model/human_pose_estimation/human_3d_pose_estimator/pose_extractor/build/ >> /root/.bashrc
 
 # USER ubuntu
 CMD ["/bin/bash"]
