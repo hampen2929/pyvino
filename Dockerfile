@@ -67,21 +67,23 @@ ENV PATH /opt/conda/bin:$PATH
 # Install Intel Python 3 core Package
 ENV ACCEPT_INTEL_PYTHON_EULA=yes
 RUN conda create -n idp python==3.6.8 -y
-RUN source activate idp
-RUN conda config --add channels intel \
+RUN source activate idp \
+    && conda config --add channels intel \
     && conda install -y -q ${INTEL_PYTHON} python=3.6.8 \
     && conda clean --all \
     && apt-get update -qqq \
     && apt-get install -y -q g++ \
-    && apt-get autoremove
-RUN conda install numpy -c intel --no-update-deps
+    && apt-get autoremove \
+    && conda install numpy -c intel --no-update-deps
+
 # env
 RUN echo source activate idp  >> ~/.bashrc
 
 # jupyter notebook
-RUN pip install jupyter
-RUN jupyter notebook --generate-config
-RUN ipython kernel install --user --name=idp --display-name=idp
+RUN source activate idp \
+    && pip install jupyter \
+    && jupyter notebook --generate-config \
+    && ipython kernel install --user --name=idp --display-name=idp
 
 # CMAKE
 RUN apt-get update

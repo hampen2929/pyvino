@@ -1,5 +1,5 @@
 # First time
-## clone repository
+## Clone repository
 ```
 mkdir $HOME/src_dir
 cd $HOME/src_dir
@@ -7,13 +7,13 @@ git clone https://github.com/hampen2929/pyvino.git
 cd pyvino
 ```
 
-## build
+## Build docker image
 
 ```
 docker build -t pyvino_image .
 ```
 
-## run
+## Run container
 ### CPU
 ```
 docker run -it \
@@ -26,50 +26,37 @@ pyvino_image \
 /bin/bash
 ```
 
-## setup
+## Setup pyvino
 ```
 cd /home/ubuntu/src_dir/pyvino
 python setup.py install
 ```
 
-<!-- ## activate 
-```
-source activate idp
-```
-
-## env
-path to pose extractor module for 3d pose estimation
-```
-export PYTHONPATH=/home/ubuntu/src_dir/pyvino/pyvino/model/human_pose_estimation/human_3d_pose_estimator/pose_extractor/build/
-```
-
-setupvars for openvino
-```
-source /opt/intel/openvino/bin/setupvars.sh
-``` -->
-
-## test
+## Test
 ```
 pytest pyvino
 ```
-cheack result here
+
+Test result images are here.
 ```
 $HOME/src_dir/pyvino/pyvino/tests/data
 ```
 
-## jupyter notebook
+# Notebook
+
 ```
 jupyter notebook --port 8888 --ip=0.0.0.0 --allow-root
 ``` 
+Notebook samples are [HERE](https://github.com/hampen2929/pyvino/tree/master/notebook).
 
 # From the second time
 Insted of build and run, use below.
-## start
+## Start
 ```
 docker start pyvino
 ```
 
-## exec
+## Execute
 ```
 docker exec -it pyvino bash
 ```
