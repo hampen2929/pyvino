@@ -28,10 +28,9 @@ pyvino_image \
 
 ## setup
 ```
-cd $HOME/src_dir/pyvino
+cd /home/ubuntu/src_dir/pyvino
 python setup.py install
 ```
-
 
 <!-- ## activate 
 ```

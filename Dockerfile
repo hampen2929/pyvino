@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip \
     curl \
     xterm \
+    vim \
     lsb-release && \
     rm -rf /var/lib/apt/lists/*
 RUN mkdir -p $TEMP_DIR && cd $TEMP_DIR && \
@@ -41,7 +42,7 @@ RUN $INSTALL_DIR/install_dependencies/install_openvino_dependencies.sh
 RUN mkdir $INSTALL_DIR/deployment_tools/inference_engine/samples/build && cd $INSTALL_DIR/deployment_tools/inference_engine/samples/build && \
     /bin/bash -c "source $INSTALL_DIR/bin/setupvars.sh && cmake .. && make -j1"
 
-RUN echo source $INSTALL_DIR/bin/setupvars.sh >> ~/.bashrc
+RUN echo "alias openvino='source /opt/intel/openvino/bin/setupvars.sh'" >> ~/.bashrc
 
 SHELL ["/bin/bash", "-c"]
 
@@ -104,7 +105,8 @@ RUN echo LC_ALL=C.UTF-8  >> ~/.bashrc
 RUN echo LANG=C.UTF-8  >> ~/.bashrc
 
 # pyvino
-RUN echo PYTHONPATH=/home/ubuntu/src_dir/pyvino/pyvino/model/human_pose_estimation/human_3d_pose_estimator/pose_extractor/build/ >> /root/.bashrc
+ENV PYTHONPATH /home/ubuntu/src_dir/pyvino/pyvino/model/human_pose_estimation/human_3d_pose_estimator/pose_extractor/build/:$PYTHONPATH
+RUN echo openvino >> /root/.bashrc
 
 # USER ubuntu
 CMD ["/bin/bash"]
