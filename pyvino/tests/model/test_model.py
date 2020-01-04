@@ -1,3 +1,4 @@
+import os
 import pytest
 from pyvino.model import (FaceDetector, 
                           BodyDetector,
@@ -33,7 +34,9 @@ class TestModel(object):
         input_frame = self.load_image(TEST_BODY)
         results = model.compute(input_frame)
         output_frame = results['frame']
-        cv2.imwrite('pyvino/tests/data/{}.png'.format(model.task), output_frame)
+        save_path = os.path.join('pyvino', 'tests', 'data', '{}.png'.format(model.task))
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        cv2.imwrite(save_path, output_frame)
         
     @pytest.mark.parametrize('Model', [PersonReidentifier,
                                        FaceReidentifier,
@@ -44,3 +47,4 @@ class TestModel(object):
         outputs = model.compute(input_frame)
         dim = outputs.shape[0]
         assert dim == 256
+    

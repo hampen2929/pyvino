@@ -3,6 +3,7 @@ import os
 import cv2
 import urllib.request
 import platform
+from google_drive_downloader import GoogleDriveDownloader as gdd
 
 from openvino.inference_engine import IENetwork, IECore
 
@@ -33,6 +34,7 @@ class BaseModel(object):
         self._set_from_config(device, model_fp, model_dir, cpu_extension)
         self._set_model_path()
         # Read IR
+        # import pdb; pdb.set_trace()
         self.net = IENetwork(model=self.model_xml, weights=self.model_bin)
         # Load Model
         self._set_ieplugin()
@@ -124,25 +126,34 @@ class BaseModel(object):
         """
         if format_type not in ["xml", "bin"]:
             raise ValueError("format_type should be xml or bin")
-        if openvino_ver is None:
-            # 2019 R2
-            base_url = "https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/{}/{}/{}"
-        elif openvino_ver == 'R3':
-            # 2019 R3
-            base_url = "https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/{}/{}/{}"
-        elif openvino_ver == 'R4':
-            # 2019 R4
-            base_url = "https://download.01.org/opencv/2019/open_model_zoo/R4/20191121_190000_models_bin/{}/{}/{}"
-        else:
-            raise ValueError
-            
-        path_save_dir = self.model_dir
-
+        
         model_name_format = "{}.{}".format(self.model_name, format_type)
-        url = base_url.format(self.model_name, self.model_fp, model_name_format)
+        
+        if self.task=="estimate_humanpose_3d":
+            # download from google drive
+            if format_type == "bin":
+                url = "19t_NLi8-nS1PcPJsNOgsgmMpwb5vI9TD"
+            elif format_type == "xml":
+                url = "10-kGlhO2KB3umqnApZOAE_Rxz8wavUOv"
+            else:
+                raise ValueError()
+        else:
+            # download from official url
+            if openvino_ver is None:
+                # 2019 R2
+                base_url = "https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/{}/{}/{}"
+            elif openvino_ver == 'R3':
+                # 2019 R3
+                base_url = "https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/{}/{}/{}"
+            elif openvino_ver == 'R4':
+                # 2019 R4
+                base_url = "https://download.01.org/opencv/2019/open_model_zoo/R4/20191121_190000_models_bin/{}/{}/{}"
+            else:
+                raise ValueError
+            url = base_url.format(self.model_name, self.model_fp, model_name_format)
 
         # save path
-        path_model_fp_dir = os.path.join(path_save_dir, self.model_name, self.model_fp)
+        path_model_fp_dir = os.path.join(self.model_dir, self.model_name, self.model_fp)
 
         # download
         if not os.path.exists(path_model_fp_dir):
@@ -151,9 +162,16 @@ class BaseModel(object):
 
         path_save = os.path.join(path_model_fp_dir, model_name_format)
         if not os.path.exists(path_save):
-            urllib.request.urlretrieve(url, path_save)
+            self._download(url, path_save)
             logger.info("download {} successfully.".format(model_name_format))
 
+    def _download(self, url, path_save):
+        if self.task=='estimate_humanpose_3d':
+            gdd.download_file_from_google_drive(file_id=url,
+                                                dest_path=path_save)
+        else:
+            urllib.request.urlretrieve(url, path_save)
+    
     def _set_model_path(self):
         """
 
