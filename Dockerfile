@@ -106,7 +106,7 @@ RUN echo LANG=C.UTF-8  >> ~/.bashrc
 
 # pyvino
 ENV PYTHONPATH /home/ubuntu/src_dir/pyvino/pyvino/model/human_pose_estimation/human_3d_pose_estimator/pose_extractor/build/:$PYTHONPATH
-RUN echo openvino >> /root/.bashrc
+RUN echo openvino >> ~/.bashrc
 
 # USER ubuntu
 CMD ["/bin/bash"]
