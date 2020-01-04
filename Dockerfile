@@ -84,13 +84,28 @@ RUN ipython kernel install --user --name=idp --display-name=idp
 RUN apt-get update
 RUN sudo apt remove cmake -y
 ARG DOWNLOAD_LINK=https://github.com/Kitware/CMake/releases/download/v3.16.2/cmake-3.16.2-Linux-x86_64.sh
-ARG TEMP_DIR=/tmp/cmake_installer/cmake-3.16.2-Linux-x86_64/
+ARG TEMP_DIR=/home/ubuntu/cmake_installer/cmake-3.16.2-Linux-x86_64/
 
-RUN mkdir -p $TEMP_DIR && cd $TEMP_DIR
-RUN wget $DOWNLOAD_LINK
-RUN chmod +x cmake-*-Linux-x86_64.sh 
-RUN sudo bash cmake-*-Linux-x86_64.sh --skip-license
-# RUN sudo mv cmake-*-Linux-x86_64 /opt
-RUN sudo ln -s /opt/cmake-*-Linux-x86_64/bin/* /usr/bin
+RUN mkdir -p $TEMP_DIR && cd $TEMP_DIR \
+    && wget $DOWNLOAD_LINK \
+    && chmod +x cmake-*-Linux-x86_64.sh \
+    && sudo bash cmake-*-Linux-x86_64.sh --skip-license \
+    && cd .. \
+    && ls \
+    && sudo mv cmake-*-Linux-x86_64 /opt \
+    && sudo ln -s /opt/cmake-3.16.2-Linux-x86_64/bin/* /usr/bin
 
+# export PATH=TEMP_DIR/bin:$PATH
+
+# env path
+RUN echo LC_ALL=C.UTF-8  >> ~/.bashrc
+RUN echo LANG=C.UTF-8  >> ~/.bashrc
+
+# pyvino
+RUN PYTHONPATH=/home/ubuntu/src/pyvino/pyvino/model/human_pose_estimation/human_3d_pose_estimator/pose_extractor/build/ >> /root/.bashrc
+
+# env activate
+RUN echo source activate idp  >> ~/.bashrc
+
+# USER ubuntu
 CMD ["/bin/bash"]

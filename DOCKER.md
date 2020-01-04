@@ -1,4 +1,12 @@
 # First time
+## clone repository
+```
+mkdir $HOME/src_dir
+cd $HOME/src_dir
+git clone https://github.com/hampen2929/pyvino.git
+cd pyvino
+```
+
 ## build
 
 ```
@@ -6,16 +14,21 @@ docker build -t pyvino_image .
 ```
 
 ## run
-
+### CPU
 ```
 docker run -it \
 --name pyvino \
 -e DISPLAY=$DISPLAY \
 -v /tmp/.X11-unix:/tmp/.X11-unix \
--v /Users/yuya/src:/home/ubuntu/src \
+-v $HOME/src_dir:/home/ubuntu/src_dir \
 -p 8888:8888 \
 pyvino_image \
 /bin/bash
+```
+
+## acativate 
+```
+source activate idp
 ```
 
 ## env
@@ -32,7 +45,7 @@ source /opt/intel/openvino/bin/setupvars.sh
 ## jupyter notebook
 ```
 jupyter notebook --port 8888 --ip=0.0.0.0 --allow-root
-```
+``` 
 
 # From the second time
 Insted of build and run, use below.
