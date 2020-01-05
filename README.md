@@ -54,3 +54,5 @@ This project is released under the [Apache 2.0 license](https://github.com/hampe
 [OpenCV dnn](https://github.com/opencv/opencv/tree/master/samples/dnn)
 
 [MODEL_ZOO](https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/)
+
+[3D pose estimation](https://github.com/Daniil-Osokin/lightweight-human-pose-estimation.pytorch)
