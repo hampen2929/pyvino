@@ -25,6 +25,8 @@ Computed results by models are as below.
 
 ![supported_models](https://user-images.githubusercontent.com/34574033/63226303-36bc7b80-c213-11e9-8881-74241128e1d3.png)
 
+![image](https://user-images.githubusercontent.com/34574033/71774364-6563a480-2fb0-11ea-8d3b-37399101bc32.png)
+
 # Installation
 ## Use docker
 Click [HERE](https://github.com/hampen2929/pyvino/blob/master/DOCKER.md) for installation instructions using docker.
