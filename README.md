@@ -18,6 +18,7 @@ We support these tasks.
 |estimate_headpose       |head-pose-estimation-adas-0001      |
 |detect_body             |person-detection-retail-0013        |
 |estimate_humanpose      |human-pose-estimation-0001          |
+|estimate_3d_humanpose   |human-pose-estimation-3d            |
 |detect_segmentation     |instance-segmentation-seurity-0050  |
 
 Computed results by models are as below.
@@ -38,6 +39,8 @@ Notebook samples are [HERE](https://github.com/hampen2929/pyvino/tree/master/not
 # Update
 v0.0.1 (2019/08/24)
 - Mac, Windows and Ubuntu are supported/
+v0.0.2 (2019/01/04)
+- 3d pose estimation, docker supported
 
 # License
 This project is released under the [Apache 2.0 license](https://github.com/hampen2929/pyvino/blob/master/LICENSE).
