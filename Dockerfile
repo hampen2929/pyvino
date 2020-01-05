@@ -1,5 +1,5 @@
 # base
-FROM ubuntu:18.04
+FROM nvidia/cuda:10.1-cudnn7-runtime-ubuntu18.04
 
 # ubuntu setting
 # RUN useradd -m -s /bin/bash ubuntu

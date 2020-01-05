@@ -26,6 +26,19 @@ pyvino_image \
 /bin/bash
 ```
 
+### GPU
+need to install nvidia-docker
+```
+docker run --runtime=nvidia -it \
+--name pyvino \
+-e DISPLAY=$DISPLAY \
+-v /tmp/.X11-unix:/tmp/.X11-unix \
+-v $HOME/src_dir:/home/ubuntu/src_dir \
+-p 8888:8888 \
+pyvino_image \
+/bin/bash
+```
+
 ## Setup pyvino
 ```
 cd /home/ubuntu/src_dir/pyvino
