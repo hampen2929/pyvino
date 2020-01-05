@@ -41,6 +41,7 @@ Notebook samples are [HERE](https://github.com/hampen2929/pyvino/tree/master/not
 # Update
 v0.0.1 (2019/08/24)
 - Mac, Windows and Ubuntu are supported/
+
 v0.0.2 (2019/01/04)
 - 3d pose estimation, docker supported
 
