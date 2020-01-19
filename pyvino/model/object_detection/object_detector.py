@@ -5,6 +5,7 @@ import pandas as pd
 import cv2
 import urllib.request
 
+
 from openvino.inference_engine import IENetwork, IEPlugin
 from ...util.config import (TASKS, load_config)
 from ...util.image import generate_canvas
@@ -142,6 +143,8 @@ class Detector(object):
 
         path_save = os.path.join(path_model_fp_dir, model_name_format)
         if not os.path.exists(path_save):
+            import ssl
+            ssl._create_default_https_context = ssl._create_unverified_context
             urllib.request.urlretrieve(url, path_save)
             logger.info("download {} successfully.".format(model_name_format))
 
