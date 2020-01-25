@@ -2,6 +2,6 @@ numpy
 pandas
 pytest==5.0.1
 matplotlib
-pillow
+pillow==6.2.1
 googledrivedownloader
 requests
