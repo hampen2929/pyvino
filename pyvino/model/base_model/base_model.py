@@ -170,6 +170,8 @@ class BaseModel(object):
             gdd.download_file_from_google_drive(file_id=url,
                                                 dest_path=path_save)
         else:
+            import ssl
+            ssl._create_default_https_context = ssl._create_unverified_context
             urllib.request.urlretrieve(url, path_save)
     
     def _set_model_path(self):
