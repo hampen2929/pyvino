@@ -45,6 +45,9 @@ v0.0.1 (2019/08/24)
 v0.0.2 (2019/01/04)
 - 3d pose estimation, docker supported
 
+v0.0.3 (2020/06/07)
+- OpenVino 2020 R3 LTS version is based
+
 # License
 This project is released under the [Apache 2.0 license](https://github.com/hampen2929/pyvino/blob/master/LICENSE).
 
