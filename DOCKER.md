@@ -17,12 +17,13 @@ docker build -t pyvino_image .
 ### CPU
 ```
 docker run -it \
+--rm \
 --name pyvino \
 -e DISPLAY=$DISPLAY \
 -v /tmp/.X11-unix:/tmp/.X11-unix \
 -v $HOME/workspace:/workspace \
 -p 8888:8888 \
-pyvino_image_dev \
+pyvino_image \
 /bin/bash
 ```
 

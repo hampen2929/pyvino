@@ -95,7 +95,7 @@ RUN mkdir -p $TEMP_DIR && \
 
 RUN /opt/intel/openvino/install_dependencies/install_openvino_dependencies.sh
 RUN source /opt/intel/openvino/bin/setupvars.sh
-RUN echo "source /opt/intel/openvino/bin/setupvars.sh" >> ~/.bashrc
+RUN echo $'source /opt/intel/openvino/bin/setupvars.sh' >> ~/.bashrc
 
 # USER ubuntu
 CMD ["/bin/bash"]
