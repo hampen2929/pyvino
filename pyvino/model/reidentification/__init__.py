@@ -1,10 +1,12 @@
-from .person_reidentification_retail.reid_0031 import PersonReid0031
-from .person_reidentification_retail.reid_0248 import PersonReid0248
+from .person_reidentification.reid_0031 import PersonReid0031
+from .person_reidentification.reid_0248 import PersonReid0248
+from .face_reidentification.reid_0095 import FaceReid0095
 
 
 __model_factory = {
     'person_reid_0031': PersonReid0031,
     'person_reid_0248': PersonReid0248,
+    'face_reid_0095': FaceReid0095,
 }
 
 

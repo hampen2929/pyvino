@@ -46,7 +46,9 @@ class BasicModel(OpenVinoModel):
     def _post_process(self, frame, cur_request_id=0):
         # Collecting object detection results
         if self.exec_net.requests[cur_request_id].wait(-1) == 0:
-            infer_rets = self.exec_net.requests[cur_request_id].outputs            
+            infer_rets = self.exec_net.requests[cur_request_id].outputs
+            ########### Implement here ###########
             infer_rets = infer_rets[self.output_blob][0]
+            ######################################
         results = {'output': infer_rets}
         return results

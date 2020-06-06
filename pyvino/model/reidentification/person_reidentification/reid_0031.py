@@ -1,15 +1,12 @@
-import cv2
-import numpy as np
-
-from ...openvino_model.basic_model import BasicModel
+from ..reidentification.reidentification import Reid
 from ....util.logger import get_logger
 
 
 logger = get_logger(__name__)
 
 
-class PersonReid0248(BasicModel):
-    model_name = 'person-reidentification-retail-0248'
+class PersonReid0031(Reid):
+    model_name = 'person-reidentification-retail-0031'
     model_loc = 'intel'
     xml_url = None
     bin_url = None

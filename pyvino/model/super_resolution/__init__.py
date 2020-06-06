@@ -7,7 +7,7 @@ __model_factory = {
 
 
 def build_super_resolution_model(name='image_super_resolution', xml_path=None, fp=None, draw=False):
-    """A function wrapper for building a model.
+    """A functaion wrapper for building a model.
     Args:
         name (str): model name.
     """
