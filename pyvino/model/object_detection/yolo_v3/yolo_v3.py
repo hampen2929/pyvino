@@ -93,7 +93,13 @@ class YoloV3(OpenVinoModel):
         origin_im_size = frame.shape[:-1]
         for obj in objects:
             # Validation bbox of detected object
+            obj['xmin'] = int(np.maximum(obj['xmin'], 0))
+            obj['ymin'] = int(np.maximum(obj['ymin'], 0))
+            obj['xmax'] = int(np.minimum(obj['xmax'], origin_im_size[1]))
+            obj['ymax'] = int(np.minimum(obj['ymax'], origin_im_size[0]))
+
             if obj['xmax'] > origin_im_size[1] or obj['ymax'] > origin_im_size[0] or obj['xmin'] < 0 or obj['ymin'] < 0:
+                logger.info('invalid bbox {}'.format(obj))
                 continue
             color = (int(min(obj['class_id'] * 12.5, 255)),
                      min(obj['class_id'] * 7, 255), min(obj['class_id'] * 5, 255))
@@ -105,7 +111,6 @@ class YoloV3(OpenVinoModel):
                     "{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} | {} ".format(det_label, obj['confidence'], obj['xmin'],
                                                                               obj['ymin'], obj['xmax'], obj['ymax'],
                                                                               color))
-
             cv2.rectangle(frame, (obj['xmin'], obj['ymin']), (obj['xmax'], obj['ymax']), color, 2)
             cv2.putText(frame,
                         "#" + det_label + ' ' + str(round(obj['confidence'] * 100, 1)) + ' %',
@@ -123,7 +128,7 @@ class YoloV3(OpenVinoModel):
 #                     (10, 10, 200), 1)
 #         cv2.putText(frame, parsing_message, (15, 30), cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
         
-        result = {'ouptut': objects, 'frame': frame}
+        result = {'output': objects, 'image': frame}
         
         return result
 
