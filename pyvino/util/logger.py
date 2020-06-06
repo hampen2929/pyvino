@@ -20,7 +20,7 @@ def get_logger(name):
     stream_handler = StreamHandler()
 
     # handlerのログレベル設定(ハンドラが出力するエラーメッセージのレベル)
-    stream_handler.setLevel(logging.DEBUG)
+    stream_handler.setLevel(logging.INFO)
 
     # ログ出力フォーマット設定
     handler_format = Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
