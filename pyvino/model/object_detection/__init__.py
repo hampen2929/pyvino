@@ -1,10 +1,14 @@
 from .yolo_v3.yolo_v3 import YoloV3
-from .person_detection_retail_0013.person_detection_retail_0013 import PersonDetectorRetail0013
+from .person_detection.person_detection_retail_0013 import PersonDetectorRetail0013
+from .face_detection.face_detector_0100 import FaceDetector0100
+from .face_detection.face_detector_0104 import FaceDetector0104
 
 
 __model_factory = {
     'yolo_v3': YoloV3,
-    'person_detector': PersonDetectorRetail0013
+    'person_detector': PersonDetectorRetail0013,
+    'face_detector_0100': FaceDetector0100,
+    'face_detector_0104': FaceDetector0104,
 }
 
 

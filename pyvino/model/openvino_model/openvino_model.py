@@ -13,6 +13,7 @@ logger = get_logger(__name__)
 
 
 class OpenVinoModel(ABC):
+    version = '2020 R3'
     model_base_url = 'https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/'
     
     def __init__(self, xml_path=None, fp=None, conf=0.6, draw=False):
@@ -68,6 +69,7 @@ class OpenVinoModel(ABC):
             from google_drive_downloader import GoogleDriveDownloader as gdd
             gdd.download_file_from_google_drive(file_id=url,
                                                 dest_path=path_save)
+        logger.info('download model from {} and save to {}'.format(url, path_save))
     
     def __set_net(self):
         # ------------- 1. Plugin initialization for specified device and load extensions library if specified -------------

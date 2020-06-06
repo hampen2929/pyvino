@@ -3,5 +3,4 @@ from .pose_estimation import build_pose_estimation_model
 from .super_resolution import build_super_resolution_model
 from .person_reidentification import build_person_reidentification_model
 from .instance_segmentation import build_instance_segmentation_model
-
-# from .classification import build_classification_model
+from .face_recognition import build_face_recognition_model
