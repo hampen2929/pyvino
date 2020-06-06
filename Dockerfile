@@ -99,7 +99,9 @@ RUN echo "source /opt/intel/openvino/bin/setupvars.sh" >> ~/.bashrc
 
 # USER ubuntu
 CMD ["/bin/bash"]
-RUN sudo chown ubuntu:ubuntu /workspace/
+RUN chown ubuntu:ubuntu /workspace/ -R
+RUN chown ubuntu:ubuntu /opt/conda/lib/python3.6/site-packages/ -R
+RUN chown ubuntu:ubuntu /opt/conda/bin/ -R
 RUN echo "ubuntu ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 RUN visudo --c
 
