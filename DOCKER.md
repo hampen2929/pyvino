@@ -29,18 +29,10 @@ pyvino_image \
 
 ## Setup pyvino
 ```
+source /opt/intel/openvino/bin/setupvars.sh
+echo 'source /opt/intel/openvino/bin/setupvars.sh' >> ~/.bashrc
 cd /workspace/pyvino
 python setup.py develop
-```
-
-## Test
-```
-pytest pyvino
-```
-
-Test result images are here.
-```
-pyvino/pyvino/tests/data
 ```
 
 # Notebook
