@@ -97,6 +97,7 @@ def plot_3d_pose(pose_3d):
     ax.set_ylim(-200,0)
     return fig
 
+
 def scale_to_height(img, height):
     scale = height / img.shape[0]
     return cv2.resize(img, dsize=None, fx=scale, fy=scale)
@@ -119,3 +120,11 @@ def generate_canvas(xmin, ymin, xmax, ymax, ratio_frame=16/9):
         raise ValueError
     return canvas_org
 
+
+def gen_nan_mat(dim, data_num=None):
+    if data_num is None:
+        mat = np.zeros(dim)
+    else:
+        mat = np.zeros((data_num, dim))
+    mat[:] = np.nan
+    return mat
