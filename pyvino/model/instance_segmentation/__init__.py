@@ -1,8 +1,10 @@
 from .instance_segmentation_security.instance_segmentation_security_0010 import InstanceSegmentation0010
+from .instance_segmentation_security.instance_segmentation_security_1025 import InstanceSegmentation1025
 
 
 __model_factory = {
     'instance_segmentation_0010': InstanceSegmentation0010,
+    'instance_segmentation_1025': InstanceSegmentation1025,
 }
 
 
