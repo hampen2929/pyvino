@@ -1,6 +1,6 @@
 numpy
 pandas
-pytest==5.0.1
+pytest==9.0.3
 matplotlib
 pillow
 googledrivedownloader
